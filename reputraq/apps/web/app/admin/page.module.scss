@@ -333,3 +333,20 @@
     flex-direction: column;
   }
 }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f4f8 25%, #e2e8f0 50%, #f0f4f8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+.skeletonTitle { height: 40px; width: 300px; }
+.skeletonButton { height: 40px; width: 120px; }
+.skeletonLabel { height: 20px; width: 80px; margin: 0 auto 10px; }
+.skeletonNumber { height: 48px; width: 60px; margin: 0 auto; }
+.skeletonTable { height: 400px; width: 100%; }

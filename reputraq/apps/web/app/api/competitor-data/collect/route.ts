@@ -23,10 +23,10 @@ function getUserIdFromRequest(request: Request): number | null {
 export async function POST(request: Request) {
   try {
     console.log('🚀 Competitor data collection request received');
-    
+
     const userId = getUserIdFromRequest(request);
     console.log('👤 User ID from request:', userId);
-    
+
     if (!userId) {
       console.log('❌ No user ID found in request');
       return NextResponse.json(
@@ -148,14 +148,15 @@ export async function POST(request: Request) {
 
     // Use the same data collection pipeline as normal keywords
     console.log('📡 Starting data collection for competitor:', competitorKeyword);
-    
+
     try {
       // Step 1: Collect REAL data from APITube API (same as regular news)
       console.log('🔍 Fetching data from APITube API for competitor:', competitorKeyword);
-      
-      const apitubeUrl = `https://api.apitube.io/v1/news/everything?per_page=10&sort.order=desc&title=${encodeURIComponent(competitorKeyword)}&api_key=api_live_OjeHlbtTqz6wIyLmJppEHQSbgj49er5AlFaNWdsNJbpT7Ub`;
+
+      const apitubeKey = process.env.APITUBE_KEY || "api_live_OjeHlbtTqz6wIyLmJppEHQSbgj49er5AlFaNWdsNJbpT7Ub";
+      const apitubeUrl = `https://api.apitube.io/v1/news/everything?per_page=10&sort.order=desc&title=${encodeURIComponent(competitorKeyword)}&api_key=${apitubeKey}`;
       console.log('📡 APITube URL:', apitubeUrl);
-      
+
       const apitubeResponse = await axios.get(apitubeUrl, {
         timeout: 30000,
         headers: {
@@ -168,7 +169,7 @@ export async function POST(request: Request) {
       console.log('📊 Articles found:', apitubeResponse.data.results?.length || 0);
 
       const apiArticles = apitubeResponse.data.results || [];
-      
+
       if (apiArticles.length === 0) {
         console.log('⚠️ No articles found from APITube for:', competitorKeyword);
         return NextResponse.json({
@@ -208,12 +209,12 @@ export async function POST(request: Request) {
       }));
 
       console.log(`💾 Storing ${transformedArticles.length} real articles for competitor: ${competitorKeyword}`);
-      
+
       const insertedArticles = [];
       for (const article of transformedArticles) {
         try {
           console.log(`🔄 Processing article: ${article.title}`);
-          
+
           // First, try to delete any existing articles with the same articleId for this user/keyword
           console.log(`🗑️ Deleting existing articles for articleId: ${article.id}`);
           try {
@@ -228,10 +229,10 @@ export async function POST(request: Request) {
           } catch (deleteError) {
             console.log(`⚠️ Delete error (continuing anyway):`, deleteError.message);
           }
-          
+
           // Then insert the new article with simplified data
           console.log(`➕ Inserting new article: ${article.title}`);
-          
+
           // Simplify the data to avoid potential type issues
           const simplifiedArticle = {
             userId: parseInt(userId.toString()),
@@ -253,14 +254,14 @@ export async function POST(request: Request) {
             engagement: article.engagement || {},
             rawData: article.rawData || {}
           };
-          
+
           console.log(`📝 Simplified article data:`, JSON.stringify(simplifiedArticle, null, 2));
-          
+
           const [insertedArticle] = await database
             .insert(newsArticles)
             .values(simplifiedArticle)
             .returning();
-          
+
           insertedArticles.push(insertedArticle);
           console.log(`✅ Successfully inserted article: ${article.title}`);
           console.log(`📊 Inserted article ID: ${insertedArticle.id}`);
@@ -289,7 +290,7 @@ export async function POST(request: Request) {
       console.log(`✅ Found ${storedArticles.length} stored articles for competitor: ${competitorKeyword}`);
 
       const success = insertedArticles.length > 0;
-      const message = success 
+      const message = success
         ? `Successfully collected ${transformedArticles.length} articles from APITube for competitor: ${competitorKeyword}`
         : `Data collection completed but no articles were inserted for competitor: ${competitorKeyword}`;
 
@@ -321,7 +322,7 @@ export async function POST(request: Request) {
         stack: collectionError.stack,
         competitorKeyword: competitorKeyword
       });
-      
+
       return NextResponse.json({
         success: false,
         message: `Failed to collect data from APITube for competitor: ${competitorKeyword}. Error: ${collectionError.message}`,

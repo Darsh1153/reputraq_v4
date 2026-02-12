@@ -161,7 +161,7 @@
     background: rgba(255, 255, 255, 0.15);
     color: white;
     font-weight: var(--font-semibold);
-    
+
     &::before {
       content: '';
       position: absolute;
@@ -329,7 +329,7 @@
   background: #f8fafc;
 }
 
-.sidebar.closed + .mainContent {
+.sidebar.closed+.mainContent {
   margin-left: 80px;
 }
 
@@ -339,12 +339,12 @@
     padding: 0.5rem;
     justify-content: center;
   }
-  
+
   .userProfile {
     padding: 0.5rem;
     justify-content: center;
   }
-  
+
   .userInfo {
     display: none;
   }
@@ -364,15 +364,15 @@
   .mainContent {
     margin-left: 0;
   }
-  
+
   .sidebarHeader {
     padding: 1rem 1.25rem 0.75rem;
   }
-  
+
   .nav {
     padding: 0.75rem 0;
   }
-  
+
   .sidebarFooter {
     padding: 0.75rem 1.25rem;
   }
@@ -382,13 +382,13 @@
   .sidebar.open {
     width: 100vw;
   }
-  
+
   .userProfile {
     flex-direction: column;
     text-align: center;
     gap: 0.5rem;
   }
-  
+
   .userInfo {
     align-items: center;
   }

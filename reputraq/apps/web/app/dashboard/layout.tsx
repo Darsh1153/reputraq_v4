@@ -32,68 +32,68 @@ const navigationItems: Array<{
   path: string;
   badge?: string;
 }> = [
-  { id: "dashboard", label: "Dashboard", icon: BarChart3, path: "/dashboard" },
-  {
-    id: "news",
-    label: "Media Monitoring",
-    icon: Newspaper,
-    path: "/dashboard/news",
-  },
-  {
-    id: "competitor",
-    label: "Competitor Analysis",
-    icon: Building2,
-    path: "/dashboard/competitor",
-  },
-  {
-    id: "competitor-vs-news",
-    label: "Competitor VS news blog",
-    icon: BarChart3,
-    path: "/dashboard/competitor-vs-news",
-  },
-  {
-    id: "keywords",
-    label: "Keywords Management",
-    icon: Search,
-    path: "/dashboard/keywords",
-  },
-  {
-    id: "social-listening-finder",
-    label: "Social Listening Finder",
-    icon: Monitor,
-    path: "/dashboard/social-listening-finder",
-  },
-  {
-    id: "hashtag-finder",
-    label: "Hashtag Finder",
-    icon: Hash,
-    path: "/dashboard/hashtag-finder",
-  },
-  {
-    id: "trending-mentions",
-    label: "Trending Mentions Finder",
-    icon: TrendingUp,
-    path: "/dashboard/trending-mentions",
-  },
-  {
-    id: "ai-orm-chatbot",
-    label: "AI ORM Chatbot",
-    icon: Bot,
-    path: "/dashboard/ai-orm-chatbot",
-  },
-  {
-    id: "profile",
-    label: "Profile Settings",
-    icon: User,
-    path: "/dashboard/profile",
-  },
-  {
-    id: "settings",
-    label: "Settings",
-    icon: Settings,
-    path: "/dashboard/settings",
-  },
-];
+    { id: "dashboard", label: "Dashboard", icon: BarChart3, path: "/dashboard" },
+    {
+      id: "news",
+      label: "Media Monitoring",
+      icon: Newspaper,
+      path: "/dashboard/news",
+    },
+    {
+      id: "competitor",
+      label: "Competitor Analysis",
+      icon: Building2,
+      path: "/dashboard/competitor",
+    },
+    {
+      id: "competitor-vs-news",
+      label: "Competitor VS news blog",
+      icon: BarChart3,
+      path: "/dashboard/competitor-vs-news",
+    },
+    {
+      id: "keywords",
+      label: "Keywords Management",
+      icon: Search,
+      path: "/dashboard/keywords",
+    },
+    {
+      id: "social-listening-finder",
+      label: "Social Listening Finder",
+      icon: Monitor,
+      path: "/dashboard/social-listening-finder",
+    },
+    {
+      id: "hashtag-finder",
+      label: "Hashtag Finder",
+      icon: Hash,
+      path: "/dashboard/hashtag-finder",
+    },
+    {
+      id: "trending-mentions",
+      label: "Trending Mentions Finder",
+      icon: TrendingUp,
+      path: "/dashboard/trending-mentions",
+    },
+    {
+      id: "ai-orm-chatbot",
+      label: "AI ORM Chatbot",
+      icon: Bot,
+      path: "/dashboard/ai-orm-chatbot",
+    },
+    {
+      id: "profile",
+      label: "Profile Settings",
+      icon: User,
+      path: "/dashboard/profile",
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      path: "/dashboard/settings",
+    },
+  ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -124,14 +124,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className={styles.logoContainer}>
             <div className={styles.logoIcon}>
               {/* <div className={styles.logoShape}></div> */}
-                <Image
-                  src="/social-listening-logo.jpeg"
-                  alt="Social Listening Logo"
-                  width={200}
-                  height={50}
-                  priority={true}
-                  className={styles.logoImage}
-                />
+              <Image
+                src="/social-listening-logo.jpeg"
+                alt="Social Listening Logo"
+                width={200}
+                height={50}
+                priority={true}
+                className={styles.logoImage}
+              />
             </div>
           </div>
           <button
@@ -176,7 +176,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </ul>
         </nav>
 
-        
+
       </div>
 
       {/* Main Content */}

@@ -15,9 +15,10 @@ export const gleanData = async (keyword: string) => {
 
     // Step 1: Get news data from APITube
     console.log(`Making APITube request for keyword: ${keyword}`);
-    const apitubeUrl = `https://api.apitube.io/v1/news/everything?per_page=10&sort.order=desc&title=${encodeURIComponent(keyword)}&api_key=api_live_OjeHlbtTqz6wIyLmJppEHQSbgj49er5AlFaNWdsNJbpT7Ub`;
+    const apitubeKey = process.env.APITUBE_KEY || "api_live_OjeHlbtTqz6wIyLmJppEHQSbgj49er5AlFaNWdsNJbpT7Ub";
+    const apitubeUrl = `https://api.apitube.io/v1/news/everything?per_page=10&sort.order=desc&title=${encodeURIComponent(keyword)}&api_key=${apitubeKey}`;
     console.log(`APITube URL: ${apitubeUrl}`);
-    
+
     const apitube_response = await axios.get(apitubeUrl, {
       timeout: 30000, // 30 second timeout
       headers: {
@@ -138,12 +139,13 @@ export const gleanData = async (keyword: string) => {
       code: error instanceof Error && 'code' in error ? (error as any).code : 'Unknown',
       cause: error instanceof Error && 'cause' in error ? (error as any).cause : 'Unknown'
     });
-    
+
     // Return partial data even if social collection fails
     try {
       console.log(`Attempting fallback news data collection for ${keyword}`);
+      const apitubeKey = process.env.APITUBE_KEY || "api_live_OjeHlbtTqz6wIyLmJppEHQSbgj49er5AlFaNWdsNJbpT7Ub";
       const apitube_response = await axios.get(
-        `https://api.apitube.io/v1/news/everything?per_page=10&sort.order=desc&title=${encodeURIComponent(keyword)}&api_key=api_live_OjeHlbtTqz6wIyLmJppEHQSbgj49er5AlFaNWdsNJbpT7Ub`,
+        `https://api.apitube.io/v1/news/everything?per_page=10&sort.order=desc&title=${encodeURIComponent(keyword)}&api_key=${apitubeKey}`,
         {
           timeout: 30000,
           headers: {
