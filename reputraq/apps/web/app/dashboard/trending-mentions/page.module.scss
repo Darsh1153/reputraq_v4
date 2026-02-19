@@ -43,7 +43,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary));
   color: white;
   border: none;
   border-radius: 12px;
@@ -100,7 +100,7 @@
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--color-brand-primary);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
@@ -139,7 +139,7 @@
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--color-brand-primary);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 }
@@ -157,7 +157,7 @@
 .checkbox {
   width: 1.25rem;
   height: 1.25rem;
-  accent-color: #3b82f6;
+  accent-color: var(--color-brand-primary);
   cursor: pointer;
 }
 
@@ -235,7 +235,7 @@
 }
 
 .hashIcon {
-  color: #3b82f6;
+  color: var(--color-brand-primary);
 }
 
 .hashtagText {
@@ -335,7 +335,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary));
   color: white;
   border: none;
   border-radius: 12px;

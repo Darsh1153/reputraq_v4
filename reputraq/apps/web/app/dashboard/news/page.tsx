@@ -8,6 +8,7 @@ import { useNewsArticles } from '@/lib/hooks/useNewsSimple';
 import { NewsMonitoringRedux } from '@/components/NewsMonitoringRedux';
 import { dataManager } from '../../../services/dataManager';
 import RefreshButton from '../../../components/RefreshButton';
+import pageStyles from './page.module.scss';
 
 interface User {
   id: number;
@@ -133,16 +134,8 @@ export default function NewsPage() {
   // Show loading state for initial load or when data is being refreshed
   if (loading || newsData.isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '50vh',
-        fontSize: '1.2rem',
-        color: '#718096'
-      }}>
-        <div style={{ marginBottom: '1rem' }}>Loading news data...</div>
+      <div className={pageStyles.loadingWrapper}>
+        <div>Loading news data...</div>
         <RefreshButton size="sm" variant="ghost" />
       </div>
     );
@@ -150,45 +143,21 @@ export default function NewsPage() {
 
   if (!user) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '50vh',
-        textAlign: 'center'
-      }}>
-        <h2 style={{ color: '#e53e3e', marginBottom: '1rem' }}>Access Denied</h2>
-        <p style={{ color: '#718096' }}>Please sign in to access news monitoring.</p>
+      <div className={pageStyles.errorWrapper}>
+        <h2 className={pageStyles.errorTitle}>Access Denied</h2>
+        <p className={pageStyles.errorMessage}>Please sign in to access news monitoring.</p>
       </div>
     );
   }
 
   if (newsError) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '50vh',
-        textAlign: 'center'
-      }}>
-        <h2 style={{ color: '#e53e3e', marginBottom: '1rem' }}>Error Loading News</h2>
-        <p style={{ color: '#718096', marginBottom: '2rem' }}>
+      <div className={pageStyles.errorWrapper}>
+        <h2 className={pageStyles.errorTitle}>Error Loading News</h2>
+        <p className={pageStyles.errorMessage}>
           {newsError.message || 'Failed to load news data'}
         </p>
-        <a 
-          href="/dashboard" 
-          style={{
-            background: '#3182ce',
-            color: 'white',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontWeight: '600'
-          }}
-        >
+        <a href="/dashboard" className={pageStyles.primaryButton}>
           Go to Dashboard
         </a>
       </div>
@@ -211,32 +180,12 @@ export default function NewsPage() {
   // Only show "No Keywords" message if we have no news data AND no keywords
   if (keywords.length === 0 && !hasNewsData) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '50vh',
-        textAlign: 'center'
-      }}>
-        <h2 style={{ color: '#2d3748', marginBottom: '1rem' }}>No Keywords Added</h2>
-        <p style={{ color: '#718096', marginBottom: '2rem' }}>
+      <div className={pageStyles.emptyWrapper}>
+        <h2 className={pageStyles.emptyTitle}>No Keywords Added</h2>
+        <p className={pageStyles.emptyMessage}>
           Add keywords to start monitoring news articles.
         </p>
-        <a 
-          href="/dashboard/keywords" 
-          style={{
-            background: '#3182ce',
-            color: 'white',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontWeight: '600',
-            transition: 'background 0.2s ease'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.background = '#2c5aa0'}
-          onMouseOut={(e) => e.currentTarget.style.background = '#3182ce'}
-        >
+        <a href="/dashboard/keywords" className={pageStyles.primaryButton}>
           Add Keywords
         </a>
       </div>
@@ -246,55 +195,21 @@ export default function NewsPage() {
   // If we have news data, show it regardless of keywords
   if (hasNewsData) {
     return (
-      <div>
-        <div style={{ 
-          marginBottom: '2rem',
-          padding: '0 1rem'
-        }}>
-          <h1 style={{ 
-            fontSize: '2rem', 
-            fontWeight: 'bold', 
-            color: '#2d3748',
-            margin: 0
-          }}>
-            News Monitoring
-          </h1>
-        </div>
-        <NewsMonitoringRedux 
-          keywords={keywords} 
-        />
+      <div className={pageStyles.pageWrapper}>
+        <h1 className={pageStyles.pageTitle}>News Monitoring</h1>
+        <NewsMonitoringRedux keywords={keywords} />
       </div>
     );
   }
-  
+
   // If no news data, show message to collect data
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column',
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '50vh',
-      textAlign: 'center'
-    }}>
-      <h2 style={{ color: '#2d3748', marginBottom: '1rem' }}>No News Data Available</h2>
-      <p style={{ color: '#718096', marginBottom: '2rem' }}>
-        No news articles have been collected yet. Go to the dashboard and click "Collect Real Data" to fetch news articles.
+    <div className={pageStyles.emptyWrapper}>
+      <h2 className={pageStyles.emptyTitle}>No News Data Available</h2>
+      <p className={pageStyles.emptyMessage}>
+        No news articles have been collected yet. Go to the dashboard and click &quot;Collect Real Data&quot; to fetch news articles.
       </p>
-      <a 
-        href="/dashboard" 
-        style={{
-          background: '#3182ce',
-          color: 'white',
-          padding: '0.75rem 1.5rem',
-          borderRadius: '8px',
-          textDecoration: 'none',
-          fontWeight: '600',
-          transition: 'background 0.2s ease'
-        }}
-        onMouseOver={(e) => e.currentTarget.style.background = '#2c5aa0'}
-        onMouseOut={(e) => e.currentTarget.style.background = '#3182ce'}
-      >
+      <a href="/dashboard" className={pageStyles.primaryButton}>
         Go to Dashboard
       </a>
     </div>

@@ -149,7 +149,7 @@ export function NewsMonitoringRedux({ keywords }: NewsMonitoringProps) {
     ).length
   };
 
-  const uniqueSources = [...new Set(articles.map(article => article.sourceName))];
+  const uniqueSources = [...new Set(articles.map(article => article.sourceName).filter(Boolean))].filter(s => s !== 'Unknown Source');
 
   if (isLoading && articles.length === 0) {
     return (
@@ -240,12 +240,13 @@ export function NewsMonitoringRedux({ keywords }: NewsMonitoringProps) {
               {collectNewsData.isPending ? 'Collecting...' : 'Collect New Data'}
             </button>
           )}
-          <button 
+          <button
+            type="button"
             onClick={() => {
               console.log('Test loading button clicked');
               dispatch(setLoadingMessage('Test loading message...'));
             }}
-            style={{ marginLeft: '10px', padding: '8px 16px', background: '#ff6b6b', color: 'white', border: 'none', borderRadius: '4px' }}
+            className={styles.testLoadingButton}
           >
             Test Loading
           </button>
@@ -396,7 +397,9 @@ export function NewsMonitoringRedux({ keywords }: NewsMonitoringProps) {
                 <div className={styles.articleContent}>
                   <div className={styles.articleHeader}>
                     <div className={styles.sourceInfo}>
-                      <span className={styles.sourceName}>{article.sourceName}</span>
+                      {article.sourceName && article.sourceName !== 'Unknown Source' && (
+                        <span className={styles.sourceName}>{article.sourceName}</span>
+                      )}
                       <span className={styles.publishTime}>{formatDate(article.publishedAt)}</span>
                     </div>
                     <div 

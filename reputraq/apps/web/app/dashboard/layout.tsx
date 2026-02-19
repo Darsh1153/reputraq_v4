@@ -13,9 +13,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Settings,
-  MoreVertical,
   Monitor,
   Hash,
+  LogOut,
 } from "lucide-react";
 import FixedRefreshButton from "../../components/FixedRefreshButton";
 import styles from "./layout.module.scss";
@@ -98,12 +98,18 @@ const navigationItems: Array<{
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activePath, setActivePath] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     setActivePath(pathname);
   }, [pathname]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   const handleSignOut = () => {
     localStorage.removeItem("user");
@@ -114,51 +120,80 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     router.push(path);
   };
 
+  const filteredNavItems = searchQuery.trim()
+    ? navigationItems.filter((item) =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : navigationItems;
+
   return (
-    <div className={styles.container}>
-      {/* Sidebar */}
+    <div className={`${styles.container} ${darkMode ? styles.dark : ""}`}>
+      {/* Sidebar - Image 1 style: floating panel, rounded, search, theme toggle */}
       <div
         className={`${styles.sidebar} ${sidebarOpen ? styles.open : styles.closed}`}
       >
         <div className={styles.sidebarHeader}>
           <div className={styles.logoContainer}>
             <div className={styles.logoIcon}>
-              {/* <div className={styles.logoShape}></div> */}
               <Image
                 src="/social-listening-logo.jpeg"
-                alt="Social Listening Logo"
-                width={200}
-                height={50}
+                alt="Reputraq"
+                width={36}
+                height={36}
                 priority={true}
                 className={styles.logoImage}
               />
             </div>
+            {sidebarOpen && (
+              <div className={styles.brandText}>
+                <span className={styles.brandName}>Reputraq</span>
+                <span className={styles.brandSubtitle}>Media intelligence</span>
+              </div>
+            )}
           </div>
           <button
+            type="button"
             className={styles.toggleButton}
             onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             {sidebarOpen ? (
-              <ChevronLeft size={16} />
+              <ChevronRight size={18} />
             ) : (
-              <ChevronRight size={16} />
+              <ChevronLeft size={18} />
             )}
           </button>
         </div>
 
+        {sidebarOpen && (
+          <div className={styles.searchWrap}>
+            <Search size={18} className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
+        )}
+
+        {!sidebarOpen && <div className={styles.searchIconOnly}><Search size={18} /></div>}
+
         <nav className={styles.nav}>
           <ul className={styles.menuList}>
-            {navigationItems.map((item) => {
+            {filteredNavItems.map((item) => {
               const IconComponent = item.icon;
               const isActive = activePath === item.path;
               return (
                 <li key={item.id} className={styles.menuItem}>
                   <button
+                    type="button"
                     onClick={() => handleMenuClick(item.path)}
                     className={`${styles.menuButton} ${isActive ? styles.active : ""}`}
                   >
                     <span className={styles.menuIcon}>
-                      <IconComponent size={16} />
+                      <IconComponent size={18} />
                     </span>
                     {sidebarOpen && (
                       <>
@@ -168,7 +203,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         )}
                       </>
                     )}
-
                   </button>
                 </li>
               );
@@ -176,13 +210,35 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </ul>
         </nav>
 
-
+        <div className={styles.sidebarFooter}>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className={styles.footerButton}
+          >
+            <LogOut size={18} />
+            {sidebarOpen && <span className={styles.footerLabel}>Logout</span>}
+          </button>
+          <div className={styles.themeRow}>
+            <span className={styles.themeLabel}>
+              {sidebarOpen && (darkMode ? "Light Mode" : "Dark Mode")}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={darkMode}
+              onClick={() => setDarkMode(!darkMode)}
+              className={`${styles.themeToggle} ${darkMode ? styles.themeToggleOn : ""}`}
+            >
+              <span className={styles.themeThumb} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
       <div className={styles.mainContent}>{children}</div>
 
-      {/* Fixed Refresh Button */}
       <FixedRefreshButton />
     </div>
   );

@@ -3,11 +3,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Brand Colors */
+  /* Brand Colors (Primary = sky blue, Secondary = ocean) */
   --color-brand-primary: #0093DD;
   --color-brand-secondary: #004163;
   --color-brand-gradient-from: #0093DD;
   --color-brand-gradient-to: #004163;
+  /* Aliases for dashboard/components */
+  --color-vibrant-blue: #0093DD;
+  --color-ocean-depth: #004163;
+  --color-primary: #0093DD;
+  --color-primary-hover: #0077b6;
+  --color-secondary: #004163;
+  --color-secondary-hover: #003350;
 
   /* Neutral Colors */
   --color-charcoal: #101010;
@@ -32,12 +39,14 @@
 
   --color-warning-50: #FFFBEB;
   --color-warning-100: #FEF3C7;
+  --color-warning-200: #FDE68A;
   --color-warning-500: #F59E0B;
   --color-warning-600: #D97706;
   --color-warning-700: #B45309;
 
   --color-error-50: #FEF2F2;
   --color-error-100: #FEE2E2;
+  --color-error-200: #FECACA;
   --color-error-500: #EF4444;
   --color-error-600: #DC2626;
   --color-error-700: #B91C1C;
@@ -112,6 +121,7 @@
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
   --shadow-brand: 0 10px 20px -5px rgba(0, 147, 221, 0.3);
   --shadow-brand-hover: 0 20px 25px -5px rgba(0, 147, 221, 0.4);
 
@@ -124,6 +134,7 @@
   --transition-fast: 150ms ease-in-out;
   --transition-base: 250ms ease-in-out;
   --transition-slow: 350ms ease-in-out;
+  --transition-all: 0.2s ease;
 }
 
 /* Global Reset and Base Styles */

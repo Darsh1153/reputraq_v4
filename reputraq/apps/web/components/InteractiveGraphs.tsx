@@ -50,10 +50,10 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
     .sort(([,a], [,b]) => b - a)
     .slice(0, 8);
 
-  // Engagement metrics
+  // Engagement metrics (ensure we always get numbers; engagement fields may be objects in DB)
   const totalEngagement = articles.reduce((sum, article) => {
     const engagement = article.engagement || {};
-    return sum + (engagement.views || 0) + (engagement.shares || 0) + (engagement.comments || 0);
+    return sum + safeEngagementNum(engagement.views) + safeEngagementNum(engagement.shares) + safeEngagementNum(engagement.comments);
   }, 0);
 
   const avgEngagement = totalEngagement / totalArticles || 0;
@@ -80,7 +80,7 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
     
     const totalEngagement = keywordArticles.reduce((sum, article) => {
       const engagement = article.engagement || {};
-      return sum + (engagement.views || 0) + (engagement.shares || 0) + (engagement.comments || 0);
+      return sum + safeEngagementNum(engagement.views) + safeEngagementNum(engagement.shares) + safeEngagementNum(engagement.comments);
     }, 0);
 
     return {
@@ -239,8 +239,8 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
                     count + (content.includes(word) ? 1 : 0), 0);
                   
                   // Calculate engagement ratio
-                  const totalEngagement = (engagement.views || 0) + (engagement.shares || 0) + (engagement.comments || 0);
-                  const engagementRatio = totalEngagement > 0 ? (engagement.shares || 0) / totalEngagement : 0;
+                  const totalEngagement = safeEngagementNum(engagement.views) + safeEngagementNum(engagement.shares) + safeEngagementNum(engagement.comments);
+                  const engagementRatio = totalEngagement > 0 ? safeEngagementNum(engagement.shares) / totalEngagement : 0;
                   
                   // Determine tone based on content analysis
                   if (excitementCount > 0 || engagementRatio > 0.1) {
@@ -339,8 +339,8 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
                 const neutralCount = neutralWords.reduce((count, word) => 
                   count + (content.includes(word) ? 1 : 0), 0);
                 
-                const totalEngagement = (engagement.views || 0) + (engagement.shares || 0) + (engagement.comments || 0);
-                const engagementRatio = totalEngagement > 0 ? (engagement.shares || 0) / totalEngagement : 0;
+                const totalEngagement = safeEngagementNum(engagement.views) + safeEngagementNum(engagement.shares) + safeEngagementNum(engagement.comments);
+                const engagementRatio = totalEngagement > 0 ? safeEngagementNum(engagement.shares) / totalEngagement : 0;
                 
                 let toneCategory = 'neutral';
                 if (excitementCount > 0 || engagementRatio > 0.1) {
@@ -848,7 +848,7 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
                 fill="none"
                 stroke="#10b981"
                 strokeWidth="20"
-                strokeDasharray={`${(articles.reduce((sum, article) => sum + (article.engagement?.views || 0), 0) / totalEngagement) * 502.4} 502.4`}
+                strokeDasharray={`${totalEngagement > 0 ? (articles.reduce((sum, article) => sum + safeEngagementNum(article.engagement?.views), 0) / totalEngagement) * 502.4 : 0} 502.4`}
                 strokeDashoffset="0"
                 transform="rotate(-90 100 100)"
                 className={styles.donutSlice}
@@ -860,8 +860,8 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
                 fill="none"
                 stroke="#3b82f6"
                 strokeWidth="20"
-                strokeDasharray={`${(articles.reduce((sum, article) => sum + (article.engagement?.shares || 0), 0) / totalEngagement) * 502.4} 502.4`}
-                strokeDashoffset={`-${(articles.reduce((sum, article) => sum + (article.engagement?.views || 0), 0) / totalEngagement) * 502.4}`}
+                strokeDasharray={`${totalEngagement > 0 ? (articles.reduce((sum, article) => sum + safeEngagementNum(article.engagement?.shares), 0) / totalEngagement) * 502.4 : 0} 502.4`}
+                strokeDashoffset={`-${totalEngagement > 0 ? (articles.reduce((sum, article) => sum + safeEngagementNum(article.engagement?.views), 0) / totalEngagement) * 502.4 : 0}`}
                 transform="rotate(-90 100 100)"
                 className={styles.donutSlice}
               />
@@ -872,8 +872,8 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
                 fill="none"
                 stroke="#f59e0b"
                 strokeWidth="20"
-                strokeDasharray={`${(articles.reduce((sum, article) => sum + (article.engagement?.comments || 0), 0) / totalEngagement) * 502.4} 502.4`}
-                strokeDashoffset={`-${((articles.reduce((sum, article) => sum + (article.engagement?.views || 0), 0) + articles.reduce((sum, article) => sum + (article.engagement?.shares || 0), 0)) / totalEngagement) * 502.4}`}
+                strokeDasharray={`${totalEngagement > 0 ? (articles.reduce((sum, article) => sum + safeEngagementNum(article.engagement?.comments), 0) / totalEngagement) * 502.4 : 0} 502.4`}
+                strokeDashoffset={`-${totalEngagement > 0 ? ((articles.reduce((sum, article) => sum + safeEngagementNum(article.engagement?.views), 0) + articles.reduce((sum, article) => sum + safeEngagementNum(article.engagement?.shares), 0)) / totalEngagement) * 502.4 : 0}`}
                 transform="rotate(-90 100 100)"
                 className={styles.donutSlice}
               />
@@ -887,17 +887,17 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
             <div className={styles.legendItem}>
               <div className={styles.legendColor} style={{ backgroundColor: '#10b981' }}></div>
               <Eye size={14} />
-              <span>Views ({formatNumber(articles.reduce((sum, article) => sum + (article.engagement?.views || 0), 0))})</span>
+              <span>Views ({formatNumber(articles.reduce((sum, article) => sum + safeEngagementNum(article.engagement?.views), 0))})</span>
             </div>
             <div className={styles.legendItem}>
               <div className={styles.legendColor} style={{ backgroundColor: '#3b82f6' }}></div>
               <Share2 size={14} />
-              <span>Shares ({formatNumber(articles.reduce((sum, article) => sum + (article.engagement?.shares || 0), 0))})</span>
+              <span>Shares ({formatNumber(articles.reduce((sum, article) => sum + safeEngagementNum(article.engagement?.shares), 0))})</span>
             </div>
             <div className={styles.legendItem}>
               <div className={styles.legendColor} style={{ backgroundColor: '#f59e0b' }}></div>
               <MessageSquare size={14} />
-              <span>Comments ({formatNumber(articles.reduce((sum, article) => sum + (article.engagement?.comments || 0), 0))})</span>
+              <span>Comments ({formatNumber(articles.reduce((sum, article) => sum + safeEngagementNum(article.engagement?.comments), 0))})</span>
             </div>
           </div>
         </div>
@@ -1421,8 +1421,21 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
   );
 }
 
+/** Safely get a numeric value from engagement fields (may be number or object in DB). */
+function safeEngagementNum(val: unknown): number {
+  if (typeof val === 'number' && !Number.isNaN(val)) return val;
+  if (val != null && typeof val === 'object') {
+    const o = val as Record<string, unknown>;
+    if (typeof o.value === 'number') return o.value;
+    if (typeof o.count === 'number') return o.count;
+  }
+  return 0;
+}
+
 function formatNumber(num: number): string {
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-  return num.toString();
+  const n = Number(num);
+  if (Number.isNaN(n) || n < 0) return '0';
+  if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+  return n.toString();
 }

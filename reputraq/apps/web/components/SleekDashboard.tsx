@@ -786,7 +786,9 @@ export function SleekDashboard() {
               <div className={styles.activityContent}>
                 <h4 className={styles.activityTitle}>{article.title}</h4>
                 <div className={styles.activityMeta}>
-                  <span className={styles.activitySource}>{article.sourceName}</span>
+                  {article.sourceName && article.sourceName !== 'Unknown Source' && (
+                    <span className={styles.activitySource}>{article.sourceName}</span>
+                  )}
                   <span className={styles.activityTime}>
                     <Clock size={14} />
                     {new Date(article.publishedAt).toLocaleDateString()}

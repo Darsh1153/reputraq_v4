@@ -1,0 +1,75 @@
+.pageWrapper {
+  padding: 0 0 0.5rem 0;
+}
+
+.pageTitle {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1.5rem 0;
+  letter-spacing: -0.02em;
+  font-family: var(--font-primary);
+}
+
+.loadingWrapper,
+.errorWrapper,
+.emptyWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loadingWrapper {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  gap: 1rem;
+}
+
+.errorWrapper,
+.emptyWrapper {
+  gap: 1rem;
+}
+
+.errorTitle,
+.emptyTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.errorTitle {
+  color: var(--color-error-600, #dc2626);
+}
+
+.emptyTitle {
+  color: var(--text-primary);
+}
+
+.errorMessage,
+.emptyMessage {
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 420px;
+}
+
+.primaryButton {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  background: var(--gradient-brand, linear-gradient(135deg, #0093DD 0%, #004163 100%));
+  color: white;
+  box-shadow: 0 4px 14px rgba(0, 147, 221, 0.35);
+}
+
+.primaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 147, 221, 0.4);
+}

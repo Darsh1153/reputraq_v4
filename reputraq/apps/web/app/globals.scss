@@ -29,14 +29,14 @@
   
   /* Shadows */
   --shadow-minimal: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-subtle: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-elevated: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-elevated: 0 12px 32px rgba(0, 0, 0, 0.08);
   
   /* Border Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
   
   /* Spacing */
   --space-xs: 0.25rem;
@@ -45,6 +45,16 @@
   --space-lg: 1.5rem;
   --space-xl: 2rem;
   --space-2xl: 3rem;
+}
+
+[data-theme="dark"] {
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #94a3b8;
+  --ui-background: #0f172a;
+  --ui-surface: #1e293b;
+  --ui-border: #334155;
+  --ui-border-light: #334155;
 }
 
 /* Global Typography */

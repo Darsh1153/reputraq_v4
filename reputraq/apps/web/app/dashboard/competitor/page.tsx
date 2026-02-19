@@ -576,6 +576,7 @@ export default function CompetitorPage() {
   }, {} as Record<string, number>);
 
   const topSourcesArray = Object.entries(topSources)
+    .filter(([sourceName]) => sourceName !== 'Unknown Source')
     .sort(([,a], [,b]) => b - a)
     .slice(0, 5);
 
@@ -728,12 +729,6 @@ export default function CompetitorPage() {
               value={selectedKeyword}
               onChange={(e) => setSelectedKeyword(e.target.value)}
               className={styles.keywordSelect}
-              style={{ 
-                border: '2px solid #3182ce', 
-                backgroundColor: '#f7fafc',
-                minHeight: '40px',
-                fontSize: '16px'
-              }}
             >
               <option value="">Select Competitor Keyword ({competitorKeywords.length} available)</option>
               {competitorKeywords.map((keyword) => (
@@ -751,16 +746,10 @@ export default function CompetitorPage() {
         </div>
         
         {/* Debug dropdown info */}
-        <div style={{ 
-          marginTop: '1rem', 
-          padding: '0.5rem', 
-          backgroundColor: '#e2e8f0', 
-          borderRadius: '4px',
-          fontSize: '14px'
-        }}>
-          <strong>Dropdown Debug:</strong> 
-          Competitor Keywords: {competitorKeywords.length} | 
-          Options: {competitorKeywords.length + 1} | 
+        <div className={styles.debugDropdown}>
+          <strong>Dropdown Debug:</strong>
+          Competitor Keywords: {competitorKeywords.length} |
+          Options: {competitorKeywords.length + 1} |
           Selected: {selectedKeyword || 'None'}
         </div>
       </div>
@@ -911,7 +900,9 @@ export default function CompetitorPage() {
               <div key={index} className={styles.articleCard}>
                 <div className={styles.articleHeader}>
                   <div className={styles.articleMeta}>
-                    <span className={styles.articleSource}>{article.source}</span>
+                    {article.source && article.source !== 'Unknown Source' && (
+                      <span className={styles.articleSource}>{article.source}</span>
+                    )}
                     <span className={styles.articleDate}>
                       <Calendar size={12} />
                       {new Date(article.publishedAt).toLocaleDateString()}
@@ -929,15 +920,37 @@ export default function CompetitorPage() {
                 
                 <div className={styles.articleFooter}>
                   <div className={styles.articleActions}>
-                    <a 
-                      href={article.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={styles.readMoreButton}
-                    >
-                      <ExternalLink size={14} />
-                      Read More
-                    </a>
+                    {(() => {
+                      const raw = article.url || (article as any).link;
+                      const fromRawData = typeof article.rawData === 'object' && article.rawData && (article.rawData.href || article.rawData.url);
+                      const articleUrl = (typeof raw === 'string' && raw !== '#' && raw.startsWith('http'))
+                        ? raw
+                        : (typeof fromRawData === 'string' && fromRawData.startsWith('http') ? fromRawData : null);
+                      const href = articleUrl || undefined;
+                      if (href) {
+                        return (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.readMoreButton}
+                          >
+                            <ExternalLink size={14} />
+                            Read More
+                          </a>
+                        );
+                      }
+                      return (
+                        <span
+                          className={styles.readMoreButton}
+                          style={{ opacity: 0.7, cursor: 'not-allowed' }}
+                          title="Article URL not available"
+                        >
+                          <ExternalLink size={14} />
+                          Read More
+                        </span>
+                      );
+                    })()}
                   </div>
                   <div className={styles.articleStats}>
                     <div className={styles.statItem}>

@@ -353,17 +353,11 @@ export default function CompetitorVsNewsPage() {
         </div>
 
         {/* Debug Information */}
-        <div style={{ 
-          marginTop: '1rem', 
-          padding: '0.5rem', 
-          backgroundColor: '#e2e8f0', 
-          borderRadius: '4px',
-          fontSize: '14px'
-        }}>
-          <strong>Debug Info:</strong><br/>
-          Brand Keywords Available (from Keywords Management): {keywords.length}<br/>
-          Competitor Keywords Available: {competitorKeywords.length}<br/>
-          Selected Brand: {selectedBrandKeyword || 'None'}<br/>
+        <div className={styles.debugInfo}>
+          <strong>Debug Info:</strong><br />
+          Brand Keywords Available (from Keywords Management): {keywords.length}<br />
+          Competitor Keywords Available: {competitorKeywords.length}<br />
+          Selected Brand: {selectedBrandKeyword || 'None'}<br />
           Selected Competitor: {selectedCompetitorKeyword || 'None'}
         </div>
 
@@ -579,7 +573,9 @@ export default function CompetitorVsNewsPage() {
                   {comparisonResult.brandArticles.slice(0, 5).map((article, index) => (
                     <div key={index} className={styles.articleCard}>
                       <div className={styles.articleHeader}>
-                        <span className={styles.articleSource}>{article.sourceName}</span>
+                        {article.sourceName && article.sourceName !== 'Unknown Source' && (
+                          <span className={styles.articleSource}>{article.sourceName}</span>
+                        )}
                         <div className={styles.articleMeta}>
                           <span className={styles.articleDate}>
                             {new Date(article.publishedAt).toLocaleDateString()}
@@ -617,7 +613,9 @@ export default function CompetitorVsNewsPage() {
                   {comparisonResult.competitorArticles.slice(0, 5).map((article, index) => (
                     <div key={index} className={styles.articleCard}>
                       <div className={styles.articleHeader}>
-                        <span className={styles.articleSource}>{article.sourceName}</span>
+                        {article.sourceName && article.sourceName !== 'Unknown Source' && (
+                          <span className={styles.articleSource}>{article.sourceName}</span>
+                        )}
                         <div className={styles.articleMeta}>
                           <span className={styles.articleDate}>
                             {new Date(article.publishedAt).toLocaleDateString()}

@@ -1,41 +1,48 @@
 .graphsContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 1.35rem;
+  margin-bottom: 0;
 }
 
 .graphCard {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
-  padding: var(--space-6);
-  border-radius: var(--radius-2xl);
-  box-shadow: 0 8px 32px rgba(0, 147, 221, 0.1);
-  border: 1px solid rgba(0, 147, 221, 0.1);
-  transition: all var(--transition-base);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1.5rem 1.75rem;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 147, 221, 0.06);
+  border: 1px solid rgba(0, 147, 221, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(0, 147, 221, 0.15);
-    border-color: rgba(0, 147, 221, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 147, 221, 0.12);
+    border-color: rgba(0, 147, 221, 0.15);
   }
+}
+
+[data-theme="dark"] .graphCard {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(148, 163, 184, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .graphHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.35rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(0, 147, 221, 0.1);
 }
 
 .graphTitle {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-primary, #1f2937);
   margin: 0;
+  letter-spacing: -0.01em;
 }
 
 // Pie Chart Styles
