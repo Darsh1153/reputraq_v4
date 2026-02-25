@@ -29,7 +29,7 @@ export interface NewsArticle {
     finalEstimatedReach: number;
     reachRange: string;
     percentageMultiplier: number;
-    voiceOfShare?: number; // Stored Voice of Share value for consistency
+    voiceOfShare?: number; // Stored Share of Voice value for consistency
   };
   rawData?: any;
   createdAt: string;

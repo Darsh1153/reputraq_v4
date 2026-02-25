@@ -1,7 +1,7 @@
 /**
- * Voice of Share Calculator Utility
+ * Share of Voice Calculator Utility
  * 
- * Calculates Voice of Share metric based on article reach and publication monthly reach
+ * Calculates Share of Voice metric based on article reach and publication monthly reach
  * Uses tiered percentage system as specified in the requirements
  */
 
@@ -90,7 +90,7 @@ function getVoiceOfShareMultiplier(monthlyReach: number): { percentage: number; 
 }
 
 /**
- * Calculate Voice of Share for a single article
+ * Calculate Share of Voice for a single article
  * 
  * @param monthlyReach - Monthly website visits of the publication
  * @param sourceName - Source name for deterministic calculation
@@ -98,7 +98,7 @@ function getVoiceOfShareMultiplier(monthlyReach: number): { percentage: number; 
  * @param url - URL for deterministic calculation
  * @param bounceRate - Bounce rate (optional, will be calculated deterministically if not provided)
  * @param dropRate - Drop rate (optional, will be calculated deterministically if not provided)
- * @returns Estimated article reach (Voice of Share)
+ * @returns Estimated article reach (Share of Voice)
  */
 export function calculateArticleVoiceOfShare(
   monthlyReach: number,
@@ -108,7 +108,7 @@ export function calculateArticleVoiceOfShare(
   bounceRate?: number,
   dropRate?: number
 ): number {
-  console.log('Calculating Voice of Share for monthly reach:', monthlyReach);
+  console.log('Calculating Share of Voice for monthly reach:', monthlyReach);
   
   // Use provided rates or generate deterministic rates based on article properties
   let finalBounceRate: number;
@@ -141,7 +141,7 @@ export function calculateArticleVoiceOfShare(
   // Apply drop rate: visitors not reaching article due to distraction
   const finalEstimatedReach = afterBounceRate * (1 - finalDropRate);
   
-  console.log('Voice of Share calculation:', {
+  console.log('Share of Voice calculation:', {
     monthlyReach,
     percentage,
     baseEstimatedReach,
@@ -154,13 +154,13 @@ export function calculateArticleVoiceOfShare(
 }
 
 /**
- * Calculate total Voice of Share across all articles
+ * Calculate total Share of Voice across all articles
  * 
  * @param articles - Array of articles with estimatedReach or monthlyReach data
  * @returns VoiceOfShareResult with total, average, and breakdown
  */
 export function calculateTotalVoiceOfShare(articles: any[]): VoiceOfShareResult {
-  console.log('Calculating total Voice of Share for', articles.length, 'articles');
+  console.log('Calculating total Share of Voice for', articles.length, 'articles');
   
   if (articles.length === 0) {
     return {
@@ -177,11 +177,11 @@ export function calculateTotalVoiceOfShare(articles: any[]): VoiceOfShareResult 
   let totalVoiceOfShare = 0;
   
   articles.forEach(article => {
-    // Check if Voice of Share is already calculated and stored
+    // Check if Share of Voice is already calculated and stored
     let articleVoiceOfShare = article.estimatedReach?.voiceOfShare;
     
     if (articleVoiceOfShare === undefined) {
-      // Need to calculate Voice of Share
+      // Need to calculate Share of Voice
       // Get monthly reach from article's estimatedReach or calculate it
       let monthlyReach = 0;
       
@@ -211,7 +211,7 @@ export function calculateTotalVoiceOfShare(articles: any[]): VoiceOfShareResult 
         }
       }
       
-      // Calculate Voice of Share deterministically using article properties
+      // Calculate Share of Voice deterministically using article properties
       articleVoiceOfShare = calculateArticleVoiceOfShare(
         monthlyReach,
         article.sourceName || 'Unknown Source',
@@ -254,7 +254,7 @@ export function calculateTotalVoiceOfShare(articles: any[]): VoiceOfShareResult 
   
   const averageVoiceOfShare = totalVoiceOfShare / articles.length;
   
-  console.log('Total Voice of Share calculated:', {
+  console.log('Total Share of Voice calculated:', {
     totalVoiceOfShare,
     averageVoiceOfShare,
     articleCount: articles.length,

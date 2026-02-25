@@ -41,7 +41,7 @@ export function enrichArticleWithReach(article: NewsArticle | any): NewsArticle 
       monthlyReach = reachResult.monthlyReach;
     }
 
-    // Calculate Voice of Share deterministically
+    // Calculate Share of Voice deterministically
     const voiceOfShare = calculateArticleVoiceOfShare(
       monthlyReach,
       article.sourceName || 'Unknown Source',
@@ -56,7 +56,7 @@ export function enrichArticleWithReach(article: NewsArticle | any): NewsArticle 
         finalEstimatedReach: reachResult.finalEstimatedReach,
         reachRange: reachResult.reachRange,
         percentageMultiplier: reachResult.percentageMultiplier,
-        voiceOfShare: voiceOfShare, // Store Voice of Share for consistency
+        voiceOfShare: voiceOfShare, // Store Share of Voice for consistency
       },
     };
   } catch (error) {

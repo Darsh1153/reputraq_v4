@@ -39,15 +39,15 @@ export function Navbar() {
         yGap={40}
       />
       <div className="container mx-auto px-4 relative z-10">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
+        <div className="flex items-center justify-between h-28">
+          {/* Logo - extra large */}
+          <Link href="/" className="flex items-center shrink-0">
             <Image
-              src="/reputraq-logo.jpeg"
+              src="/reputraq-logo.svg"
               alt="Reputraq Logo"
-              width={160}
-              height={48}
-              className="h-12 w-auto"
+              width={480}
+              height={120}
+              className="h-20 sm:h-24 md:h-28 w-auto object-contain"
               priority
             />
           </Link>

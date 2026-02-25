@@ -6,7 +6,7 @@ import { eq, desc, and } from 'drizzle-orm';
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-const GEMINI_API_KEY = 'AIzaSyCwrKeSW9CCbhodXfG6waFQXnScqDiZD4s';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 function getUserIdFromRequest(request: Request): number | null {
@@ -461,6 +461,13 @@ Respond in a conversational, helpful tone. Use rich markdown formatting to creat
     }
 
     const fullPrompt = `${systemPrompt}${conversationContext}\n\nUser: ${message}\n\nAssistant:`;
+
+    if (!GEMINI_API_KEY) {
+      return NextResponse.json(
+        { error: 'Chatbot is not configured. Set GEMINI_API_KEY in environment variables.' },
+        { status: 503 }
+      );
+    }
 
     // Call Gemini API
     const geminiResponse = await fetch(GEMINI_API_URL, {

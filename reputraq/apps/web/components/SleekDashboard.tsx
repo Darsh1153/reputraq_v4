@@ -741,15 +741,15 @@ export function SleekDashboard() {
           </div>
           <div className={styles.metricContent}>
             <div className={styles.metricValue}>{(() => {
-              // Calculate Voice of Share based on article reach
+              // Calculate Share of Voice based on article reach
               if (articles.length === 0) return '0';
               
               const voiceOfShareResult = calculateTotalVoiceOfShare(articles);
-              console.log('Voice of Share calculated:', voiceOfShareResult);
+              console.log('Share of Voice calculated:', voiceOfShareResult);
               
               return formatVoiceOfShareNumber(voiceOfShareResult.totalVoiceOfShare);
             })()}</div>
-            <div className={styles.metricLabel}>Voice of Share</div>
+            <div className={styles.metricLabel}>Share of Voice</div>
             <div className={styles.metricChange}>
             </div>
           </div>

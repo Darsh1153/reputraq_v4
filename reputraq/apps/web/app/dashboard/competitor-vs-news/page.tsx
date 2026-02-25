@@ -276,7 +276,7 @@ export default function CompetitorVsNewsPage() {
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.headerText}>
-            <h1>Competitor VS News Blog</h1>
+            <h1>Competitor VS You</h1>
             <p>Compare sentiment analysis between your brand and competitors</p>
           </div>
         </div>

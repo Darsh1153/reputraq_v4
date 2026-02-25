@@ -1193,15 +1193,15 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
         </div>
       </div>
 
-      {/* Voice of Share Chart */}
+      {/* Share of Voice Chart */}
       <div className={styles.graphCard}>
         <div className={styles.graphHeader}>
-          <h3 className={styles.graphTitle}>Voice of Share Analysis</h3>
+          <h3 className={styles.graphTitle}>Share of Voice Analysis</h3>
           <Volume2 size={20} />
         </div>
         <div className={styles.voiceOfShareChart}>
           {(() => {
-            // Calculate Voice of Share by keyword
+            // Calculate Share of Voice by keyword
             const voiceOfShareData = keywords.map(keyword => {
               const keywordArticles = articles.filter(article => 
                 article.keyword?.toLowerCase() === keyword.toLowerCase() ||
@@ -1213,7 +1213,7 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
               
               const voiceOfShareResult = calculateTotalVoiceOfShare(keywordArticles);
               
-              // Calculate Voice of Share distribution by sentiment
+              // Calculate Share of Voice distribution by sentiment
               const positiveArticles = keywordArticles.filter(article => (article.sentimentScore || 0) > 10);
               const negativeArticles = keywordArticles.filter(article => (article.sentimentScore || 0) < -10);
               const neutralArticles = keywordArticles.filter(article => 
@@ -1224,7 +1224,7 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
               const negativeVoiceOfShare = calculateTotalVoiceOfShare(negativeArticles).totalVoiceOfShare;
               const neutralVoiceOfShare = calculateTotalVoiceOfShare(neutralArticles).totalVoiceOfShare;
               
-              // Calculate Voice of Share by tier
+              // Calculate Share of Voice by tier
               const tierDistribution = voiceOfShareResult.breakdown.reduce((acc, tier) => {
                 acc[tier.tier] = tier.totalReach;
                 return acc;
@@ -1254,7 +1254,7 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
             if (voiceOfShareData.length === 0) {
               return (
                 <div className={styles.noDataMessage}>
-                  <p>No Voice of Share data available</p>
+                  <p>No Share of Voice data available</p>
                 </div>
               );
             }
@@ -1263,9 +1263,9 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
             
             return (
               <div className={styles.voiceOfShareContainer}>
-                {/* Voice of Share by Keyword - Bar Chart */}
+                {/* Share of Voice by Keyword - Bar Chart */}
                 <div className={styles.voiceOfShareSection}>
-                  <h4 className={styles.voiceOfShareSectionTitle}>Total Voice of Share by Keyword</h4>
+                  <h4 className={styles.voiceOfShareSectionTitle}>Total Share of Voice by Keyword</h4>
                   <div className={styles.voiceOfShareBarChart}>
                     {voiceOfShareData.map((data, index) => {
                       const barWidth = maxVoiceOfShare > 0 ? (data.totalVoiceOfShare / maxVoiceOfShare) * 100 : 0;
@@ -1296,9 +1296,9 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
                   </div>
                 </div>
                 
-                {/* Voice of Share by Sentiment - Donut Chart */}
+                {/* Share of Voice by Sentiment - Donut Chart */}
                 <div className={styles.voiceOfShareSection}>
-                  <h4 className={styles.voiceOfShareSectionTitle}>Voice of Share by Sentiment</h4>
+                  <h4 className={styles.voiceOfShareSectionTitle}>Share of Voice by Sentiment</h4>
                   <div className={styles.voiceOfShareDonutChart}>
                     <div className={styles.voiceOfShareDonutContainer}>
                       <svg viewBox="0 0 200 200" className={styles.voiceOfShareDonutSvg}>
@@ -1376,7 +1376,7 @@ export function InteractiveGraphs({ articles, keywords }: GraphData) {
                         <div className={styles.voiceOfShareDonutCenterNumber}>
                           {formatVoiceOfShareNumber(voiceOfShareData.reduce((sum, data) => sum + data.totalVoiceOfShare, 0))}
                         </div>
-                        <div className={styles.voiceOfShareDonutCenterLabel}>Total Voice of Share</div>
+                        <div className={styles.voiceOfShareDonutCenterLabel}>Total Share of Voice</div>
                       </div>
                     </div>
                     <div className={styles.voiceOfShareDonutLegend}>

@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import FixedRefreshButton from "../../components/FixedRefreshButton";
 import styles from "./layout.module.scss";
-import Image from "next/image";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -47,7 +46,7 @@ const navigationItems: Array<{
     },
     {
       id: "competitor-vs-news",
-      label: "Competitor VS news blog",
+      label: "Competitor VS You",
       icon: BarChart3,
       path: "/dashboard/competitor-vs-news",
     },
@@ -133,23 +132,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         className={`${styles.sidebar} ${sidebarOpen ? styles.open : styles.closed}`}
       >
         <div className={styles.sidebarHeader}>
-          <div className={styles.logoContainer}>
-            <div className={styles.logoIcon}>
-              <Image
-                src="/social-listening-logo.jpeg"
-                alt="Reputraq"
-                width={36}
-                height={36}
-                priority={true}
-                className={styles.logoImage}
-              />
-            </div>
-            {sidebarOpen && (
-              <div className={styles.brandText}>
-                <span className={styles.brandName}>Reputraq</span>
-                <span className={styles.brandSubtitle}>Media intelligence</span>
-              </div>
-            )}
+          <div className={styles.headerLogoWrap}>
+            <img
+              src="/reputraq_logo.svg"
+              alt="Reputraq"
+              className={styles.headerLogo}
+            />
           </div>
           <button
             type="button"
