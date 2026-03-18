@@ -47,7 +47,7 @@ export function Navbar() {
               alt="Reputraq Logo"
               width={480}
               height={120}
-              className="h-12 sm:h-14 md:h-16 w-auto object-contain"
+              className="h-8 sm:h-9 md:h-10 w-auto object-contain"
               priority
             />
           </Link>
