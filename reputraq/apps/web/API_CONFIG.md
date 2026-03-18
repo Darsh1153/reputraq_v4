@@ -7,14 +7,14 @@ Create a `.env.local` file in the root directory with the following variables:
 ```bash
 # Ensemble Social API Configuration
 NEXT_PUBLIC_ENSEMBLE_BASE_URL=https://ensembledata.com/apis
-ENSEMBLE_TOKEN=QWZp10LXkDheSUQo
+ENSEMBLE_TOKEN=your_ensemble_token
 ```
 
 ## API Key Fallback System
 
 ✅ **Automatic Fallback**: The system now prioritises a single managed API key and will rotate through any additional keys you configure in `lib/api-fallback.ts`.
 
-- **darsh_collection@ensembledata.com**: `QWZp10LXkDheSUQo`
+- Set `ENSEMBLE_TOKEN` in `.env.local` (get token from [Ensemble Data dashboard](https://dashboard.ensembledata.com))
 
 ### How It Works
 
@@ -74,7 +74,7 @@ curl -X POST http://localhost:3000/api/hashtag-finder \
   -d '{"name":"amazon","depth":"1","onlyShorts":"false"}'
 
 # Test individual APIs (replace with your actual URL)
-curl "https://your-actual-api-url.com/instagram/search?text=tiger&token=QWZp10LXkDheSUQo"
+curl "https://ensembledata.com/apis/instagram/search?text=tiger&token=YOUR_ENSEMBLE_TOKEN"
 ```
 
 ## What's Working

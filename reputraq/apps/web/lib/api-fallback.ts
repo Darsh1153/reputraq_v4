@@ -1,7 +1,7 @@
 // API Key Fallback System for Ensemble Data API
 // Handles automatic fallback when API limits are reached
 
-const defaultToken = process.env.ENSEMBLE_TOKEN || 'QWZp10LXkDheSUQo';
+const defaultToken = process.env.ENSEMBLE_TOKEN || 'HXM3PoRr3WFOcsJD';
 
 interface ApiKey {
   email: string;
@@ -23,7 +23,7 @@ class ApiKeyManager {
   private apiKeys: ApiKey[] = [
     {
       email: 'darsh_collection@ensembledata.com',
-      token: 'QWZp10LXkDheSUQo', // Hardcoded new API key
+      token: 'HXM3PoRr3WFOcsJD', // Fallback API key (prefer ENSEMBLE_TOKEN in env)
       isActive: true,
       errorCount: 0
     }

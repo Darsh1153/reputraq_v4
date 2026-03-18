@@ -25,6 +25,7 @@ import { InteractiveGraphs } from './InteractiveGraphs';
 import ExportButton from './ExportButton';
 import { createNewsExportData } from '@/utils/exportUtils';
 import { formatReachNumber } from '@/utils/reachCalculator';
+import { formatDateTime } from '@/utils/dateTime';
 import styles from './NewsMonitoring.module.scss';
 
 interface NewsMonitoringProps {
@@ -211,6 +212,7 @@ export function NewsMonitoringRedux({ keywords }: NewsMonitoringProps) {
                 variant="primary"
                 size="medium"
                 showLabel={true}
+                dropdownPlacement="down"
                 targetElementRef={newsSectionRef}
               />
             </div>
@@ -224,7 +226,7 @@ export function NewsMonitoringRedux({ keywords }: NewsMonitoringProps) {
                 <div className={styles.automationTitle}>Auto Collection</div>
                 <div className={styles.automationSubtitle}>
                   {lastCollectionTime 
-                    ? `Last: ${new Date(lastCollectionTime).toLocaleString()}`
+                    ? `Last: ${formatDateTime(lastCollectionTime)}`
                     : 'Every 24 hours'
                   }
                 </div>

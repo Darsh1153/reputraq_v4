@@ -3,7 +3,20 @@ import { db } from '@/lib/db';
 import { users, keywords } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
+// Ensure route is dynamic and has time for DB connection in serverless
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+
 export async function POST(request: Request) {
+  // Fail fast with a proper JSON response if DB is not configured (e.g. missing env in Vercel)
+  if (!process.env.DATABASE_URL?.trim()) {
+    console.error('Signin: DATABASE_URL is not set');
+    return NextResponse.json(
+      { message: 'Service unavailable. Please try again later.' },
+      { status: 503 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { email, password } = body;
@@ -52,8 +65,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Signin error:', error);
+    // Always return JSON so the client can show a message instead of "Network error"
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: 'Unable to sign in. Please try again later.' },
       { status: 500 }
     );
   }

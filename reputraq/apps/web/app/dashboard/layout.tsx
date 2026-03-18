@@ -3,6 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
+  applyThemePreference,
+  getDisplaySettings,
+  resolveTheme,
+  setDisplaySettings,
+} from "@/lib/displaySettings";
+import {
   BarChart3,
   Newspaper,
   Building2,
@@ -110,6 +116,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
+  // Initialize theme from saved Display settings, and keep in sync with Settings tab changes.
+  useEffect(() => {
+    const applyFromStorage = () => {
+      const settings = getDisplaySettings();
+      const resolved = resolveTheme(settings.theme);
+      setDarkMode(resolved === "dark");
+      applyThemePreference(settings.theme);
+    };
+
+    applyFromStorage();
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "displaySettings") applyFromStorage();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   const handleSignOut = () => {
     localStorage.removeItem("user");
     router.push("/");
@@ -215,7 +239,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               type="button"
               role="switch"
               aria-checked={darkMode}
-              onClick={() => setDarkMode(!darkMode)}
+              onClick={() => {
+                const current = getDisplaySettings();
+                const nextResolved = darkMode ? "light" : "dark";
+                setDarkMode(!darkMode);
+                setDisplaySettings({
+                  ...current,
+                  theme: nextResolved,
+                });
+                applyThemePreference(nextResolved);
+              }}
               className={`${styles.themeToggle} ${darkMode ? styles.themeToggleOn : ""}`}
             >
               <span className={styles.themeThumb} />

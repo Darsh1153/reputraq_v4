@@ -38,9 +38,14 @@ export default function SigninPage() {
     }
 
     setIsSubmitting(true);
+    setErrors({});
 
     try {
-      const response = await fetch('/api/auth/signin', {
+      // Use same-origin URL so production (e.g. app.reputraq.com) always hits the correct API
+      const apiUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/api/auth/signin`
+        : '/api/auth/signin';
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,8 +53,10 @@ export default function SigninPage() {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json().catch(() => ({}));
+
       if (response.ok) {
-        const { user, redirectTo } = await response.json();
+        const { user } = data;
         
         // Store user data in localStorage (in production, use secure cookies)
         localStorage.setItem('user', JSON.stringify(user));
@@ -67,11 +74,10 @@ export default function SigninPage() {
           router.push(`/signup/confirmation?userId=${user.id}`);
         }
       } else {
-        const error = await response.json();
-        setErrors({ general: error.message || 'Sign in failed' });
+        setErrors({ general: (data && data.message) || 'Sign in failed' });
       }
     } catch (error) {
-      setErrors({ general: 'Network error. Please try again.' });
+      setErrors({ general: 'Unable to connect. Please check your connection and try again.' });
     } finally {
       setIsSubmitting(false);
     }

@@ -55,6 +55,26 @@
   --ui-surface: #1e293b;
   --ui-border: #334155;
   --ui-border-light: #334155;
+
+  /* Align the design-system tokens used across dashboard/components */
+  --color-charcoal: #e2e8f0;
+  --color-white: #0f172a; /* "surface-0" */
+  --color-gray-50: #0b1220;
+  --color-gray-100: #0f172a; /* surface */
+  --color-gray-200: #1e293b; /* raised surface */
+  --color-gray-300: #334155; /* borders */
+  --color-gray-400: #475569; /* muted borders */
+  --color-gray-500: #94a3b8; /* muted text */
+  --color-gray-600: #cbd5e1; /* secondary text */
+  --color-gray-700: #e2e8f0; /* primary text */
+  --color-gray-800: #f1f5f9;
+  --color-gray-900: #ffffff;
+
+  /* Dark-friendly shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-base: 0 6px 16px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45);
 }
 
 /* Global Typography */
@@ -100,4 +120,47 @@ h6 { font-size: 1rem; }
 strong {
   color: var(--text-primary);
   font-weight: 600;
+}
+
+/* PDF export layout stabilization (used by exportService.exportToPDF) */
+.pdfExportMode {
+  background: #ffffff !important;
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Prevent “glass” effects from creating odd render artifacts in canvas captures */
+  [style*="backdrop-filter"],
+  [class*="header"],
+  [class*="card"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Never capture export dropdown/overlays in the PDF */
+  .dropdown,
+  .overlay {
+    display: none !important;
+  }
+
+  /* Encourage block integrity for any print-based engines (and helps layout consistency) */
+  [class*="card"],
+  canvas,
+  svg,
+  section,
+  article {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  canvas,
+  svg,
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
 }

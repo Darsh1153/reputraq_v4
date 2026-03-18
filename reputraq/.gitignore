@@ -24,3 +24,4 @@ pnpm-debug.log*
 .DS_Store
 .next.cache
 .vercel
+.env*.local

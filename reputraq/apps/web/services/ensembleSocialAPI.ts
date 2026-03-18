@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Your API configuration
 const baseUrl = process.env.NEXT_PUBLIC_ENSEMBLE_API_URL || 'https://ensembledata.com/apis';
-const token = process.env.ENSEMBLE_TOKEN || 'QWZp10LXkDheSUQo';
+const token = process.env.ENSEMBLE_TOKEN || 'HXM3PoRr3WFOcsJD';
 
 interface YouTubeSearchParams { 
   keyword: string;

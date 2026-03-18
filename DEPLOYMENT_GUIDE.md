@@ -4,6 +4,44 @@ This guide will walk you through deploying both applications to Vercel with cust
 - **Landing App** → `reputraq.com`
 - **Web App** → `app.reputraq.com`
 
+## Deploy using Reputraq (not darsh1153)
+
+To deploy to the **reputraq** Vercel team/account (not your personal darsh1153 account):
+
+1. **Log in as reputraq**
+   ```bash
+   vercel logout
+   vercel login
+   ```
+   Use the email/password or method for the **reputraq** account that owns the "reputraq" and "web" projects.
+
+2. **Confirm scope**
+   ```bash
+   vercel whoami
+   ```
+   You should see the reputraq team/account, not darsh1153.
+
+3. **Deploy both projects**
+   ```bash
+   ./scripts/deploy-reputraq.sh
+   ```
+   Or set the scope explicitly: `VERCEL_SCOPE=reputraq ./scripts/deploy-reputraq.sh`
+
+4. **Root Directory in Vercel**  
+   In the Vercel dashboard, for each project set:
+   - **reputraq** project → **Root Directory**: `apps/landing`
+   - **web** project → **Root Directory**: `apps/web`  
+   (Settings → General → Root Directory, relative to the repo/monorepo root.)
+
+5. **Production login (fix "Network error" on sign-in)**  
+   For the **web** project, add environment variables in Vercel so the sign-in API can reach the database:
+   - **Vercel** → **web** project → **Settings** → **Environment Variables**
+   - Add at least: **`DATABASE_URL`** (your Supabase/postgres connection string, same as in `reputraq/apps/web/.env.local`)
+   - Add any other vars from `reputraq/apps/web/.env.local` that the app needs (e.g. `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ENSEMBLE_TOKEN`, `APITUBE_KEY`, etc.)
+   - Redeploy the **web** project after adding or changing env vars.
+
+---
+
 ## Prerequisites
 
 1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com) if you don't have one
@@ -114,6 +152,43 @@ Add all required environment variables for the web app:
 3. Click **"Add Domain"**
 4. Enter: `app.reputraq.com`
 5. Click **"Add"**
+
+### 4.2.1 Fix "Verification Needed" / "Domain linked to another Vercel account"
+
+If Vercel shows **Verification Needed** and says *"This domain is linked to another Vercel account"*, you must add a **TXT** record to prove ownership:
+
+1. In Vercel → **web** project → **Settings** → **Domains**, find the orange alert for `app.reputraq.com` and the **TXT** record details.
+2. Copy the exact **Name** and **Value** from that page (they are project-specific). They look like:
+   - **Type:** `TXT`
+   - **Name:** `_vercel` (for the subdomain `_vercel.reputraq.com`)
+   - **Value:** `vc-domain-verify=app.reputraq.com,xxxxxxxxxx` (your value will have a different hash)
+3. In your **DNS provider** (where `reputraq.com` is managed — e.g. Cloudflare, GoDaddy, Namecheap, Google Domains):
+   - Add a new record:
+     - **Type:** TXT  
+     - **Name/Host:** `_vercel` (or `_vercel.app` if your provider uses full subdomain; some use `_vercel.reputraq.com`)
+     - **Value/Content:** paste the full value from Vercel (e.g. `vc-domain-verify=app.reputraq.com,acf9d6ceed3a2501f127`)
+     - **TTL:** 3600 or default
+   - Save the record.
+4. Wait for DNS to propagate (from a few minutes up to 48 hours). In Vercel → **Domains**, click **Refresh** next to `app.reputraq.com` to re-check.
+5. After verification, Vercel will show **Valid Configuration**. You can then remove the TXT record if you want; the domain will stay verified.
+
+**Also ensure** `app.reputraq.com` points to Vercel for traffic. Add (or keep) a **CNAME** record:
+- **Name:** `app`
+- **Value:** `cname.vercel-dns.com`  
+(or the CNAME target shown in Vercel for this project).
+
+#### Hostinger DNS (reputraq.com)
+
+In **Hostinger** → **Domains** → **reputraq.com** → **DNS / Nameservers**, ensure you have:
+
+| Type  | Name    | Value / Content |
+|-------|---------|-----------------|
+| **CNAME** | `app` | Use the value from Vercel (e.g. `cname.vercel-dns.com` or project-specific like `xxxxx.vercel-dns-017.com`) |
+| **TXT**   | `_vercel` | Exact value from Vercel Domains for `app.reputraq.com` (e.g. `vc-domain-verify=app.reputraq.com,xxxxxxxxxx`) |
+
+- You can have multiple TXT records with Name `_vercel` (e.g. one for `app.reputraq.com`, one for `www.reputraq.com`); Hostinger lists them separately.
+- After adding or editing, wait a few minutes, then in **Vercel** → **web** → **Domains** click **Refresh** next to `app.reputraq.com`.
+- The **CNAME target** must match what Vercel shows for the **web** project. If you previously pointed `app` to another project’s URL, update it to the current project’s target.
 
 ### 4.3 Configure DNS Records
 

@@ -33,6 +33,7 @@ import {
   ArrowDown,
   Equal
 } from 'lucide-react';
+import { formatDateOnly } from '@/utils/dateTime';
 import styles from './page.module.scss';
 
 interface User {
@@ -408,7 +409,7 @@ export default function CompetitorVsNewsPage() {
                   Articles analyzed: <strong>{comparisonResult.comparison.totalArticlesAnalyzed}</strong>
                 </p>
                 <p className={styles.dataSource}>
-                  📊 {comparisonResult.dataSource} | Analysis date: {new Date(comparisonResult.analysisDate).toLocaleDateString()}
+                  📊 {comparisonResult.dataSource} | Analysis date: {formatDateOnly(comparisonResult.analysisDate)}
                 </p>
               </div>
             </div>
@@ -435,7 +436,9 @@ export default function CompetitorVsNewsPage() {
                   <div className={styles.sentimentLabel}>Neutral</div>
                   <div className={styles.sentimentValue}>{comparisonResult.brandSentiment.neutral}</div>
                   <div className={styles.sentimentPercentage}>
-                    {((comparisonResult.brandSentiment.neutral / comparisonResult.brandSentiment.totalArticles) * 100).toFixed(1)}%
+                    {comparisonResult.brandSentiment.totalArticles > 0
+                      ? ((comparisonResult.brandSentiment.neutral / comparisonResult.brandSentiment.totalArticles) * 100).toFixed(1)
+                      : '0.0'}%
                   </div>
                 </div>
                 <div className={styles.sentimentItem}>
@@ -508,7 +511,9 @@ export default function CompetitorVsNewsPage() {
                   <div className={styles.sentimentLabel}>Neutral</div>
                   <div className={styles.sentimentValue}>{comparisonResult.competitorSentiment.neutral}</div>
                   <div className={styles.sentimentPercentage}>
-                    {((comparisonResult.competitorSentiment.neutral / comparisonResult.competitorSentiment.totalArticles) * 100).toFixed(1)}%
+                    {comparisonResult.competitorSentiment.totalArticles > 0
+                      ? ((comparisonResult.competitorSentiment.neutral / comparisonResult.competitorSentiment.totalArticles) * 100).toFixed(1)
+                      : '0.0'}%
                   </div>
                 </div>
                 <div className={styles.sentimentItem}>
@@ -578,7 +583,7 @@ export default function CompetitorVsNewsPage() {
                         )}
                         <div className={styles.articleMeta}>
                           <span className={styles.articleDate}>
-                            {new Date(article.publishedAt).toLocaleDateString()}
+                            {formatDateOnly(article.publishedAt)}
                           </span>
                           <span className={`${styles.sentimentBadge} ${styles[article.sentimentLabel || 'neutral']}`}>
                             {article.sentimentLabel || 'neutral'} ({article.sentimentScore || 0})
@@ -618,7 +623,7 @@ export default function CompetitorVsNewsPage() {
                         )}
                         <div className={styles.articleMeta}>
                           <span className={styles.articleDate}>
-                            {new Date(article.publishedAt).toLocaleDateString()}
+                            {formatDateOnly(article.publishedAt)}
                           </span>
                           <span className={`${styles.sentimentBadge} ${styles[article.sentimentLabel || 'neutral']}`}>
                             {article.sentimentLabel || 'neutral'} ({article.sentimentScore || 0})

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Clock, Play, Pause, Settings, RefreshCw, Calendar, AlertCircle } from 'lucide-react';
+import { formatDateTime } from '@/utils/dateTime';
 import styles from './CronJobManager.module.scss';
 
 interface CronJobSettings {
@@ -139,13 +140,7 @@ export function CronJobManager({ userId, className = '' }: CronJobManagerProps) 
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Never';
-    return new Date(dateString).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatDateTime(dateString);
   };
 
   const getStatusColor = (status: string) => {

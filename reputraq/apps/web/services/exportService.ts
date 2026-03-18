@@ -259,56 +259,167 @@ class ExportService {
   async exportToPDF(data: ExportData, targetElement?: HTMLElement): Promise<void> {
     try {
       let canvas: HTMLCanvasElement;
+      const captureScale = 2;
       
       if (targetElement && typeof window !== 'undefined') {
-        console.log('📄 Starting PDF export with full page view...');
-        
-        // Store original styles
-        const originalClasses = targetElement.className;
-        const originalWidth = targetElement.style.width;
-        const originalMaxWidth = targetElement.style.maxWidth;
-        const originalOverflow = targetElement.style.overflow;
-        
-        // Apply PDF export mode class temporarily
-        targetElement.className += ' pdfExportMode';
-        
-        // Calculate optimal width for A4 page (210mm = 794px at 96 DPI)
-        // Use full page width minus margins (10mm each side = 190mm = ~716px)
-        // But we'll use a scale factor, so let's use 800px for better quality
-        const targetWidth = 800; // Full width for A4 page
-        targetElement.style.width = `${targetWidth}px`;
-        targetElement.style.maxWidth = 'none';
-        targetElement.style.overflow = 'visible';
-        
-        // Wait for styles to apply and UI to stabilize
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Capture the specific element with full height
-        const fullHeight = targetElement.scrollHeight;
-        console.log('📏 Element dimensions:', { width: targetWidth, height: fullHeight });
-        
-        canvas = await html2canvas(targetElement, {
-          scale: 2, // Higher scale for better quality
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-          width: targetWidth,
-          height: fullHeight,
-          scrollX: 0,
-          scrollY: 0,
-          windowWidth: targetWidth,
-          windowHeight: fullHeight,
-          removeContainer: false
-        });
-        
-        console.log('🖼️ Canvas created:', { width: canvas.width, height: canvas.height });
-        
-        // Restore original classes and styles
-        targetElement.className = originalClasses;
-        targetElement.style.width = originalWidth;
-        targetElement.style.maxWidth = originalMaxWidth;
-        targetElement.style.overflow = originalOverflow;
+        console.log('📄 Starting PDF export (block-based pagination)...');
+
+        // IMPORTANT: never mutate the live dashboard DOM for capture.
+        // Instead, clone the target section into an off-screen sandbox so the UI
+        // does not reflow/shift while exporting.
+        const targetWidth = 800; // A4-friendly capture width
+        let sandbox: HTMLDivElement | null = null;
+        let clone: HTMLElement | null = null;
+
+        try {
+          sandbox = document.createElement('div');
+          sandbox.style.position = 'fixed';
+          sandbox.style.left = '-10000px';
+          sandbox.style.top = '0';
+          sandbox.style.width = `${targetWidth}px`;
+          sandbox.style.background = '#ffffff';
+          sandbox.style.pointerEvents = 'none';
+          sandbox.style.opacity = '0';
+          sandbox.style.zIndex = '-1';
+
+          clone = targetElement.cloneNode(true) as HTMLElement;
+          clone.classList.add('pdfExportMode');
+          clone.style.width = `${targetWidth}px`;
+          clone.style.maxWidth = 'none';
+          clone.style.overflow = 'visible';
+
+          sandbox.appendChild(clone);
+          document.body.appendChild(sandbox);
+
+          // Wait a tick so fonts/layouts in the clone settle.
+          await new Promise(resolve => setTimeout(resolve, 250));
+
+        // Create PDF upfront so we can paginate per-block.
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
+        const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+        const margin = 10;
+        const availableWidth = pageWidth - (margin * 2);
+        const availableHeight = pageHeight - (margin * 2);
+        const pxToMm = 0.264583; // 96 DPI
+
+        let cursorY = margin;
+
+        const addCanvasToPdf = (blockCanvas: HTMLCanvasElement) => {
+          const imgData = blockCanvas.toDataURL('image/png', 1.0);
+          const imgWidthMm = blockCanvas.width * pxToMm;
+          const imgHeightMm = blockCanvas.height * pxToMm;
+          const widthScale = availableWidth / imgWidthMm;
+          const scaledWidth = availableWidth;
+          const scaledHeight = imgHeightMm * widthScale;
+
+          // New page if it won't fit on current page
+          if (cursorY !== margin && cursorY + scaledHeight > pageHeight - margin) {
+            pdf.addPage();
+            cursorY = margin;
+          }
+
+          // If it's taller than a full page, we must slice it (rare once we split by blocks).
+          if (scaledHeight > availableHeight) {
+            const mmPerPx = pxToMm * widthScale;
+            const maxPageHeightPx = Math.floor(availableHeight / mmPerPx);
+            let sourceY = 0;
+            let pageIndex = 0;
+
+            while (sourceY < blockCanvas.height - 1) {
+              const sliceHeight = Math.min(maxPageHeightPx, blockCanvas.height - sourceY);
+              if (pageIndex > 0 || cursorY !== margin) {
+                pdf.addPage();
+                cursorY = margin;
+              }
+
+              const sliceCanvas = document.createElement('canvas');
+              const sliceCtx = sliceCanvas.getContext('2d');
+              if (!sliceCtx) throw new Error('Could not get canvas context');
+              sliceCanvas.width = blockCanvas.width;
+              sliceCanvas.height = sliceHeight;
+              sliceCtx.drawImage(
+                blockCanvas,
+                0,
+                sourceY,
+                blockCanvas.width,
+                sliceHeight,
+                0,
+                0,
+                blockCanvas.width,
+                sliceHeight
+              );
+
+              const sliceImgData = sliceCanvas.toDataURL('image/png', 1.0);
+              const sliceScaledHeight = sliceHeight * mmPerPx;
+              pdf.addImage(sliceImgData, 'PNG', margin, cursorY, scaledWidth, sliceScaledHeight);
+              sourceY += sliceHeight;
+              pageIndex += 1;
+            }
+            cursorY = margin; // next block starts on fresh page after slicing
+            return;
+          }
+
+          pdf.addImage(imgData, 'PNG', margin, cursorY, scaledWidth, scaledHeight);
+          cursorY += scaledHeight + 4; // small gap between blocks
+        };
+
+        const captureAndAdd = async (el: HTMLElement, depth = 0): Promise<void> => {
+          // Skip hidden elements
+          const style = window.getComputedStyle(el);
+          if (style.display === 'none' || style.visibility === 'hidden') return;
+
+          // Capture this element
+          const blockCanvas = await html2canvas(el, {
+            scale: captureScale,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: targetWidth
+          });
+
+          // If the captured block doesn't fit on a page, recursively split into children blocks.
+          const imgWidthMm = blockCanvas.width * pxToMm;
+          const imgHeightMm = blockCanvas.height * pxToMm;
+          const widthScale = availableWidth / imgWidthMm;
+          const scaledHeight = imgHeightMm * widthScale;
+
+          if (scaledHeight > availableHeight && depth < 2) {
+            const childEls = Array.from(el.children).filter(
+              (c): c is HTMLElement => c instanceof HTMLElement
+            );
+            if (childEls.length > 1) {
+              for (const child of childEls) {
+                await captureAndAdd(child, depth + 1);
+              }
+              return;
+            }
+          }
+
+          addCanvasToPdf(blockCanvas);
+        };
+
+        // Capture direct children in order; this avoids breaking mid-graph.
+        const topLevelBlocks = Array.from(clone.children).filter(
+          (c): c is HTMLElement => c instanceof HTMLElement
+        );
+        for (const block of topLevelBlocks) {
+          await captureAndAdd(block, 0);
+        }
+
+        const filename = this.generateFilename(data, { format: 'pdf' });
+        console.log('💾 Saving PDF:', filename);
+        pdf.save(filename);
+        console.log('✅ PDF export completed successfully');
+        return;
+        } finally {
+          if (sandbox && sandbox.parentNode) {
+            sandbox.parentNode.removeChild(sandbox);
+          }
+        }
       } else if (typeof window !== 'undefined') {
         // Create a PDF from data (fallback)
         const pdf = new jsPDF('p', 'mm', 'a4');
@@ -410,53 +521,49 @@ class ExportService {
           : margin;
         pdf.addImage(imgData, 'PNG', x, y, scaledWidth, scaledHeight);
       } else {
-        // Multi-page - split content across pages
-        const imgHeightPerPage = canvas.height / pagesNeeded;
-        const scaledHeightPerPage = scaledHeight / pagesNeeded;
-        
-        for (let i = 0; i < pagesNeeded; i++) {
-          if (i > 0) {
-            pdf.addPage();
-          }
-          
-          // Calculate source coordinates in canvas pixels
-          const sourceY = i * imgHeightPerPage;
-          const sourceHeight = Math.min(
-            imgHeightPerPage,
-            canvas.height - sourceY
-          );
-          
-          // Create a temporary canvas for this page slice
+        // Multi-page - split content across pages (fallback path when no targetElement provided).
+        const mmPerPx = pxToMm * widthScale; // because we fit-to-width
+        const maxPageHeightPx = Math.floor(availableHeight / mmPerPx);
+        let pageIndex = 0;
+        let sourceY = 0;
+        while (sourceY < canvas.height - 1) {
+          const breakY = Math.min(canvas.height, Math.max(sourceY + 1, sourceY + maxPageHeightPx));
+          const sourceHeight = breakY - sourceY;
+
+          if (pageIndex > 0) pdf.addPage();
+
           const pageCanvas = document.createElement('canvas');
           const pageCtx = pageCanvas.getContext('2d');
-          if (!pageCtx) {
-            throw new Error('Could not get canvas context');
-          }
-          
+          if (!pageCtx) throw new Error('Could not get canvas context');
+
           pageCanvas.width = canvas.width;
           pageCanvas.height = sourceHeight;
-          
-          // Draw the portion of the image for this page
           pageCtx.drawImage(
             canvas,
-            0, sourceY,           // Source position
-            canvas.width, sourceHeight, // Source size
-            0, 0,                 // Destination position
-            canvas.width, sourceHeight  // Destination size
-          );
-          
-          const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
-          const x = margin;
-          const y = margin;
-          const pageScaledHeight = (sourceHeight * pxToMm) * widthScale;
-          
-          pdf.addImage(pageImgData, 'PNG', x, y, scaledWidth, pageScaledHeight);
-          
-          console.log(`📄 Added page ${i + 1}/${pagesNeeded}`, {
+            0,
             sourceY,
+            canvas.width,
             sourceHeight,
+            0,
+            0,
+            canvas.width,
+            sourceHeight
+          );
+
+          const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
+          const pageScaledHeight = sourceHeight * mmPerPx;
+          pdf.addImage(pageImgData, 'PNG', margin, margin, scaledWidth, pageScaledHeight);
+
+          console.log(`📄 Added page ${pageIndex + 1}/${pagesNeeded}`, {
+            sourceY,
+            breakY,
+            sourceHeight,
+            maxPageHeightPx,
             pageScaledHeight
           });
+
+          sourceY = breakY;
+          pageIndex += 1;
         }
       }
       
@@ -467,18 +574,6 @@ class ExportService {
       
     } catch (error) {
       console.error('PDF export failed:', error);
-      
-      // Ensure we restore styles even if there's an error
-      if (targetElement) {
-        try {
-          targetElement.className = targetElement.className.replace(' pdfExportMode', '');
-          targetElement.style.width = '';
-          targetElement.style.maxWidth = '';
-          targetElement.style.overflow = '';
-        } catch (restoreError) {
-          console.error('Error restoring element styles:', restoreError);
-        }
-      }
       
       // Fallback to CSV export
       try {

@@ -5,7 +5,7 @@ const axios = require('axios');
 
 // Configuration
 const baseUrl = process.env.NEXT_PUBLIC_ENSEMBLE_API_URL || 'https://your-base-url.com';
-const token = process.env.ENSEMBLE_TOKEN || 'QWZp10LXkDheSUQo';
+const token = process.env.ENSEMBLE_TOKEN || 'HXM3PoRr3WFOcsJD';
 
 const testKeyword = 'keyboard';
 

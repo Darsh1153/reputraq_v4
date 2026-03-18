@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { newsArticles, keywords, competitorKeywords } from '@/lib/db/schema';
 import { eq, and, desc, gte, or, ilike } from 'drizzle-orm';
+import axios from 'axios';
 
 function getUserIdFromRequest(request: Request): number | null {
   try {
@@ -45,6 +46,34 @@ function createKeywordMatchConditions(keyword: string) {
       ilike(newsArticles.description, `%${normalizedKeyword}%`)
     ] : [])
   );
+}
+
+async function fetchArticlesMatchingStoredKeyword(params: {
+  database: any;
+  userId: number;
+  keyword: string;
+  limit?: number;
+}) {
+  const { database, userId, keyword, limit = 2000 } = params;
+  const normalized = keyword.toLowerCase().trim();
+
+  // Media Monitoring is driven by the stored `newsArticles.keyword` values (the keyword used during collection).
+  // To keep both pages consistent, prioritize keyword-column matching (case-insensitive / contains).
+  return database
+    .select()
+    .from(newsArticles)
+    .where(
+      and(
+        eq(newsArticles.userId, userId),
+        or(
+          eq(newsArticles.keyword, keyword),
+          eq(newsArticles.keyword, normalized),
+          ilike(newsArticles.keyword, `%${normalized}%`)
+        )
+      )
+    )
+    .orderBy(desc(newsArticles.publishedAt))
+    .limit(limit);
 }
 
 interface SentimentAnalysis {
@@ -156,6 +185,108 @@ function calculateSentimentAnalysis(articles: any[], keyword: string): Sentiment
   };
 }
 
+async function collectAndStoreCompetitorNews({
+  userId,
+  competitorKeyword,
+}: {
+  userId: number;
+  competitorKeyword: string;
+}): Promise<{ collected: number; inserted: number }> {
+  const trimmed = competitorKeyword.trim();
+  if (!trimmed) return { collected: 0, inserted: 0 };
+
+  const apitubeKey =
+    process.env.APITUBE_KEY ||
+    'api_live_OjeHlbtTqz6wIyLmJppEHQSbgj49er5AlFaNWdsNJbpT7Ub';
+
+  // Keep parity with existing competitor collection endpoint: title search, 10 articles.
+  const apitubeUrl = `https://api.apitube.io/v1/news/everything?per_page=10&sort.order=desc&title=${encodeURIComponent(
+    trimmed,
+  )}&api_key=${apitubeKey}`;
+
+  const apitubeResponse = await axios.get(apitubeUrl, {
+    timeout: 30000,
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      Accept: 'application/json',
+    },
+  });
+
+  const apiArticles: any[] = apitubeResponse.data?.results || [];
+  if (apiArticles.length === 0) return { collected: 0, inserted: 0 };
+
+  const database = await db;
+  let inserted = 0;
+
+  for (const article of apiArticles) {
+    const articleId = String(
+      article.id?.toString() ||
+        `apitube_${trimmed}_${Math.random().toString(36).slice(2, 9)}`,
+    );
+
+    const simplifiedArticle = {
+      userId,
+      keyword: trimmed,
+      articleId,
+      title: article.title || 'No title',
+      description: article.description || article.body || '',
+      url: article.href || article.url || '#',
+      publishedAt: new Date(article.published_at || new Date()),
+      sourceName: article.source?.name || 'Unknown Source',
+      sourceLogo: article.source?.logo || article.source?.favicon || '',
+      image: article.image || '',
+      sentimentScore: article.sentiment?.overall?.score
+        ? Math.round(article.sentiment.overall.score * 100)
+        : 0,
+      sentimentLabel:
+        article.sentiment?.overall?.label ||
+        article.sentiment?.overall?.polarity ||
+        'neutral',
+      readTime: article.read_time || 1,
+      isBreaking: article.is_breaking || false,
+      categories: (article.categories || []).map((c: any) => c?.name || c).filter(Boolean),
+      topics: (article.topics || []).map((t: any) => t?.name || t).filter(Boolean),
+      engagement: {
+        views: article.views || 0,
+        shares: article.shares || 0,
+        comments: article.comments || 0,
+        likes: article.likes || 0,
+      },
+      rawData: article,
+    };
+
+    try {
+      // Avoid duplicates for this user + keyword + articleId
+      await database
+        .delete(newsArticles)
+        .where(
+          and(
+            eq(newsArticles.userId, userId),
+            eq(newsArticles.keyword, trimmed),
+            eq(newsArticles.articleId, articleId),
+          ),
+        );
+
+      const insertedRows = await database
+        .insert(newsArticles)
+        .values(simplifiedArticle)
+        .returning();
+
+      if (insertedRows?.length) inserted += 1;
+    } catch (e) {
+      // Keep best-effort: some articles may fail due to schema/type issues.
+      console.error('❌ Failed inserting competitor article:', {
+        competitorKeyword: trimmed,
+        articleId,
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  return { collected: apiArticles.length, inserted };
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Competitor VS News comparison request received');
@@ -185,186 +316,85 @@ export async function POST(request: NextRequest) {
 
     const database = await db;
 
-    // Get date range for recent articles (last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    // Fetch brand articles with intelligent keyword matching
-    console.log('📰 Fetching brand articles for:', brandKeyword);
-    const brandKeywordConditions = createKeywordMatchConditions(brandKeyword);
-    const brandArticles = await database
-      .select()
-      .from(newsArticles)
-      .where(
-        and(
-          eq(newsArticles.userId, userId),
-          brandKeywordConditions,
-          gte(newsArticles.publishedAt, thirtyDaysAgo)
-        )
-      )
-      .orderBy(desc(newsArticles.publishedAt))
-      .limit(200); // Increased limit for better analysis
-
-    console.log('📊 Found brand articles:', brandArticles.length);
-    console.log('📰 Brand articles sample:', brandArticles.slice(0, 3).map(a => ({
-      title: a.title,
-      keyword: a.keyword,
-      sentimentScore: a.sentimentScore
-    })));
-
-    // Always use comprehensive search for brand articles to match all available articles
-    let finalBrandArticles = brandArticles;
-    
-    // Get ALL articles for the user (no date restriction for comprehensive search)
-    const allUserArticles = await database
-      .select()
-      .from(newsArticles)
-      .where(eq(newsArticles.userId, userId))
-      .orderBy(desc(newsArticles.publishedAt))
-      .limit(500); // Increased limit for comprehensive search
-    
-    console.log('📊 Total user articles available:', allUserArticles.length);
-    
-    // Filter articles that contain the brand keyword in title, description, or keyword field
-    // Use more precise matching to avoid false positives
-    const comprehensiveBrandArticles = allUserArticles.filter(article => {
-      const keywordLower = brandKeyword.toLowerCase().trim();
-      const titleLower = article.title?.toLowerCase() || '';
-      const descLower = article.description?.toLowerCase() || '';
-      const articleKeywordLower = article.keyword?.toLowerCase() || '';
-      
-      // Exact keyword match in the keyword field (highest priority)
-      if (articleKeywordLower === keywordLower) {
-        return true;
-      }
-      
-      // Check if the article's keyword field contains the brand keyword
-      if (articleKeywordLower.includes(keywordLower)) {
-        return true;
-      }
-      
-      // Check if the brand keyword contains the article's keyword (for broader matches)
-      if (keywordLower.includes(articleKeywordLower) && articleKeywordLower.length > 2) {
-        return true;
-      }
-      
-      // Only check title and description if the keyword is substantial (3+ characters)
-      // and use word boundary matching to avoid false positives
-      if (keywordLower.length >= 3) {
-        const wordBoundaryRegex = new RegExp(`\\b${keywordLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-        
-        if (wordBoundaryRegex.test(titleLower) || wordBoundaryRegex.test(descLower)) {
-          return true;
-        }
-      }
-      
-      return false;
+    console.log('📰 Fetching brand articles (match stored keyword):', brandKeyword);
+    let finalBrandArticles = await fetchArticlesMatchingStoredKeyword({
+      database,
+      userId,
+      keyword: brandKeyword,
+      limit: 2000,
     });
-    
-    // Use the larger set of articles (either intelligent matching or comprehensive search)
-    if (comprehensiveBrandArticles.length > brandArticles.length) {
-      finalBrandArticles = comprehensiveBrandArticles;
-      console.log('📊 Using comprehensive search for brand articles:', finalBrandArticles.length);
-    } else {
-      console.log('📊 Using intelligent matching for brand articles:', finalBrandArticles.length);
-    }
-    
-    console.log('📰 Brand articles sample:', finalBrandArticles.slice(0, 3).map(a => ({
-      title: a.title,
-      keyword: a.keyword,
-      sentimentScore: a.sentimentScore,
-      publishedAt: a.publishedAt
-    })));
-    
-    // Debug: Show why articles were matched
-    if (finalBrandArticles.length > 0) {
-      console.log('🔍 Brand article matching debug:');
-      finalBrandArticles.slice(0, 3).forEach((article, index) => {
-        console.log(`Article ${index + 1}:`, {
-          title: article.title,
-          keyword: article.keyword,
-          matchesKeyword: article.keyword?.toLowerCase() === brandKeyword.toLowerCase(),
-          keywordContains: article.keyword?.toLowerCase().includes(brandKeyword.toLowerCase()),
-          titleContains: article.title?.toLowerCase().includes(brandKeyword.toLowerCase())
-        });
+    console.log('📊 Found brand articles:', finalBrandArticles.length);
+
+    // If brand has no stored articles, best-effort collect (keeps parity with competitor auto-collection).
+    if (finalBrandArticles.length === 0) {
+      console.log('⚠️ No brand articles found. Auto-collecting from APITube...', {
+        brandKeyword,
+        userId,
       });
-    }
 
-    // Fetch competitor articles with intelligent keyword matching
-    console.log('📰 Fetching competitor articles for:', competitorKeyword);
-    const competitorKeywordConditions = createKeywordMatchConditions(competitorKeyword);
-    const competitorArticles = await database
-      .select()
-      .from(newsArticles)
-      .where(
-        and(
-          eq(newsArticles.userId, userId),
-          competitorKeywordConditions,
-          gte(newsArticles.publishedAt, thirtyDaysAgo)
-        )
-      )
-      .orderBy(desc(newsArticles.publishedAt))
-      .limit(200); // Increased limit for better analysis
+      try {
+        const { collected, inserted } = await collectAndStoreCompetitorNews({
+          userId,
+          competitorKeyword: brandKeyword,
+        });
+        console.log('✅ Brand auto-collection finished:', { collected, inserted });
 
-    console.log('📊 Found competitor articles:', competitorArticles.length);
-    console.log('📰 Competitor articles sample:', competitorArticles.slice(0, 3).map(a => ({
-      title: a.title,
-      keyword: a.keyword,
-      sentimentScore: a.sentimentScore
-    })));
-
-    // Always use comprehensive search for competitor articles to match all available articles
-    let finalCompetitorArticles = competitorArticles;
-    
-    // Filter articles that contain the competitor keyword in title, description, or keyword field
-    // Use more precise matching to avoid false positives
-    const comprehensiveCompetitorArticles = allUserArticles.filter(article => {
-      const keywordLower = competitorKeyword.toLowerCase().trim();
-      const titleLower = article.title?.toLowerCase() || '';
-      const descLower = article.description?.toLowerCase() || '';
-      const articleKeywordLower = article.keyword?.toLowerCase() || '';
-      
-      // Exact keyword match in the keyword field (highest priority)
-      if (articleKeywordLower === keywordLower) {
-        return true;
-      }
-      
-      // Check if the article's keyword field contains the competitor keyword
-      if (articleKeywordLower.includes(keywordLower)) {
-        return true;
-      }
-      
-      // Check if the competitor keyword contains the article's keyword (for broader matches)
-      if (keywordLower.includes(articleKeywordLower) && articleKeywordLower.length > 2) {
-        return true;
-      }
-      
-      // Only check title and description if the keyword is substantial (3+ characters)
-      // and use word boundary matching to avoid false positives
-      if (keywordLower.length >= 3) {
-        const wordBoundaryRegex = new RegExp(`\\b${keywordLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-        
-        if (wordBoundaryRegex.test(titleLower) || wordBoundaryRegex.test(descLower)) {
-          return true;
+        if (inserted > 0) {
+          finalBrandArticles = await fetchArticlesMatchingStoredKeyword({
+            database,
+            userId,
+            keyword: brandKeyword,
+            limit: 2000,
+          });
+          console.log('📊 Brand articles after auto-collection:', finalBrandArticles.length);
         }
+      } catch (e) {
+        console.error('❌ Brand auto-collect failed (continuing with empty brand set):', {
+          brandKeyword,
+          message: e instanceof Error ? e.message : String(e),
+        });
       }
-      
-      return false;
-    });
-    
-    // Use the larger set of articles (either intelligent matching or comprehensive search)
-    if (comprehensiveCompetitorArticles.length > competitorArticles.length) {
-      finalCompetitorArticles = comprehensiveCompetitorArticles;
-      console.log('📊 Using comprehensive search for competitor articles:', finalCompetitorArticles.length);
-    } else {
-      console.log('📊 Using intelligent matching for competitor articles:', finalCompetitorArticles.length);
     }
-    
-    console.log('📰 Competitor articles sample:', finalCompetitorArticles.slice(0, 3).map(a => ({
-      title: a.title,
-      keyword: a.keyword,
-      sentimentScore: a.sentimentScore
-    })));
+
+    console.log('📰 Fetching competitor articles (match stored keyword):', competitorKeyword);
+    let finalCompetitorArticles = await fetchArticlesMatchingStoredKeyword({
+      database,
+      userId,
+      keyword: competitorKeyword,
+      limit: 2000,
+    });
+    console.log('📊 Found competitor articles:', finalCompetitorArticles.length);
+
+    // If competitor has no stored articles, auto-collect (to match Media Monitoring expectations)
+    if (finalCompetitorArticles.length === 0) {
+      console.log('⚠️ No competitor articles found. Auto-collecting from APITube...', {
+        competitorKeyword,
+        userId,
+      });
+
+      try {
+        const { collected, inserted } = await collectAndStoreCompetitorNews({
+          userId,
+          competitorKeyword,
+        });
+        console.log('✅ Auto-collection finished:', { collected, inserted });
+
+        if (inserted > 0) {
+          finalCompetitorArticles = await fetchArticlesMatchingStoredKeyword({
+            database,
+            userId,
+            keyword: competitorKeyword,
+            limit: 2000,
+          });
+          console.log('📊 Competitor articles after auto-collection:', finalCompetitorArticles.length);
+        }
+      } catch (e) {
+        console.error('❌ Auto-collect failed (continuing with empty competitor set):', {
+          competitorKeyword,
+          message: e instanceof Error ? e.message : String(e),
+        });
+      }
+    }
 
     // Calculate comprehensive sentiment analysis for both
     const brandSentiment = calculateSentimentAnalysis(finalBrandArticles, brandKeyword);

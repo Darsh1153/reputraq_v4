@@ -20,6 +20,15 @@ interface AdminContentProps {
     initialUsers: User[];
 }
 
+// Format date consistently for server and client to avoid hydration mismatch (locale differs in Node vs browser)
+function formatDate(date: Date | string): string {
+    const d = new Date(date);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${m}/${day}/${y}`;
+}
+
 export function AdminContent({ initialUsers }: AdminContentProps) {
     const [users, setUsers] = useState<User[]>(initialUsers);
     const [error, setError] = useState<string | null>(null);
@@ -117,7 +126,7 @@ export function AdminContent({ initialUsers }: AdminContentProps) {
                                 <td>{user.companyName}</td>
                                 <td><span className={`${styles.planBadge} ${styles[user.plan]}`}>{user.plan.toUpperCase()}</span></td>
                                 <td><span className={`${styles.statusBadge} ${styles[user.status]}`}>{user.status.toUpperCase()}</span></td>
-                                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                                <td suppressHydrationWarning>{formatDate(user.createdAt)}</td>
                                 <td className={styles.actionsCell}>
                                     <div className={styles.actionButtons}>
                                         {user.status === 'pending' && (

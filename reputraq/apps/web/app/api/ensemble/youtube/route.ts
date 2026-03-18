@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const ENSEMBLE_BASE_URL = process.env.NEXT_PUBLIC_ENSEMBLE_BASE_URL;
-const ENSEMBLE_TOKEN = process.env.ENSEMBLE_TOKEN || 'QWZp10LXkDheSUQo';
+const ENSEMBLE_TOKEN = process.env.ENSEMBLE_TOKEN || 'HXM3PoRr3WFOcsJD';
 
 export async function GET(request: NextRequest) {
   try {

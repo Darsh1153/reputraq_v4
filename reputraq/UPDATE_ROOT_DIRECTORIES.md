@@ -1,26 +1,26 @@
-# Update Root Directories for Vercel Projects
+# Update Root Directories for Vercel Projects (Reputraq)
 
-Both projects need their root directories updated to work with the monorepo structure.
+Both projects need their root directories set so the monorepo builds correctly.
 
 ## Option 1: Via Vercel Dashboard (Easiest)
 
-1. **Landing App:**
-   - Visit: https://vercel.com/darsh1153s-projects/landing/settings/general
-   - Find "Root Directory" setting
-   - Change from `.` to `apps/landing`
+1. **reputraq (landing):**
+   - Visit: https://vercel.com/reputraqs-projects/reputraq/settings
+   - Under **Build and Development**, find **Root Directory**
+   - Set to: `apps/landing` (or click Edit and enter it)
    - Save
 
-2. **Web App:**
-   - Visit: https://vercel.com/darsh1153s-projects/web/settings/general
-   - Find "Root Directory" setting
-   - Change from `.` to `apps/web`
+2. **web:**
+   - Visit: https://vercel.com/reputraqs-projects/web/settings
+   - Under **Build and Development**, find **Root Directory**
+   - Set to: `apps/web`
    - Save
 
 ## Option 2: Via API (Requires Token)
 
-1. Get your Vercel token from: https://vercel.com/account/tokens
-2. Run: `VERCEL_TOKEN=your_token ./update-both-projects.sh`
+1. Get a token from https://vercel.com/account/tokens (log in as Reputraq).
+2. Run from repo root: `VERCEL_TOKEN=your_token ./reputraq/update-both-projects.sh`
 
-## Project IDs:
-- Landing: prj_CYw7b2feZdDlT0pWxLKeN0khMnYy
-- Web: prj_XiTdIbDbAOzjFjLG9j7dG78KHHvO
+## Project IDs (reputraqs-projects)
+- reputraq: prj_KbmVDQkajmqxfUSZtZppDmQUTUqG
+- web: prj_la5pvFkxAquYTTRdWgJl6B9C23BP
