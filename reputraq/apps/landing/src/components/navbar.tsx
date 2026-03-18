@@ -40,14 +40,14 @@ export function Navbar() {
       />
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex items-center justify-between h-28">
-          {/* Logo - extra large */}
+          {/* Logo */}
           <Link href="/" className="flex items-center shrink-0">
             <Image
               src="/reputraq-logo.svg"
               alt="Reputraq Logo"
               width={480}
               height={120}
-              className="h-20 sm:h-24 md:h-28 w-auto object-contain"
+              className="h-12 sm:h-14 md:h-16 w-auto object-contain"
               priority
             />
           </Link>

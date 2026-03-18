@@ -156,7 +156,7 @@ export function Footer() {
                     alt="Reputraq Logo"
                     width={480}
                     height={120}
-                    className="h-20 sm:h-24 md:h-28 w-auto object-contain"
+                    className="h-12 sm:h-14 md:h-16 w-auto object-contain"
                     priority
                   />
                 </Link>
