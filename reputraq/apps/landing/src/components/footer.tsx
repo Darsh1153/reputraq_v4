@@ -152,11 +152,11 @@ export function Footer() {
               <div className="mb-8">
                 <Link href="/" className="flex items-center mb-6">
                   <Image
-                    src="/reputraq-logo.svg"
+                    src="/reputraq-blue-arrow.svg"
                     alt="Reputraq Logo"
                     width={480}
                     height={120}
-                    className="h-8 sm:h-9 md:h-10 w-auto object-contain"
+                    className="h-20 sm:h-24 md:h-28 w-auto object-contain"
                     priority
                   />
                 </Link>
