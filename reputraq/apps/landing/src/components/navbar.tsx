@@ -43,11 +43,11 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center shrink-0">
             <Image
-              src="/reputraq-blue-arrow.svg"
+              src="/reputraq-logo.svg"
               alt="Reputraq Logo"
               width={480}
               height={120}
-              className="h-20 sm:h-24 md:h-28 w-auto object-contain"
+              className="h-10 sm:h-11 md:h-12 w-auto object-contain"
               priority
             />
           </Link>
