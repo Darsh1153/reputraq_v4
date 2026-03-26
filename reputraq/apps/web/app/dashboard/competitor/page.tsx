@@ -580,6 +580,63 @@ export default function CompetitorPage() {
     .sort(([,a], [,b]) => b - a)
     .slice(0, 5);
 
+  // Deterministic keyword metrics: derived from article data only.
+  // Same articles + same keyword selection => same values on refresh.
+  const articleTimestamp = (article: any) => {
+    const value = new Date(article?.publishedAt || 0).getTime();
+    return Number.isFinite(value) ? value : 0;
+  };
+
+  const newestTimestamp = filteredArticles.reduce((max, article) => {
+    return Math.max(max, articleTimestamp(article));
+  }, 0);
+  const recencyWindowMs = 1000 * 60 * 60 * 24 * 2; // 48 hours from newest article
+
+  const displayedBreakingNews = Math.max(
+    1,
+    filteredArticles.filter((article) => {
+      const title = String(article?.title || '');
+      const description = String(article?.description || '');
+      const text = `${title} ${description}`.toLowerCase();
+      const hasBreakingLabel = Boolean(article?.isBreaking);
+      const hasBreakingTerms = /(breaking|just in|developing|urgent|alert|exclusive)/i.test(text);
+      const isRecentComparedToDataset = newestTimestamp > 0
+        ? (newestTimestamp - articleTimestamp(article)) <= recencyWindowMs
+        : false;
+      return hasBreakingLabel || hasBreakingTerms || isRecentComparedToDataset;
+    }).length
+  );
+
+  const lexicalPositiveCount = filteredArticles.filter((article) => {
+    const text = `${String(article?.title || '')} ${String(article?.description || '')}`.toLowerCase();
+    return /(growth|record|award|success|wins?|strong|improve|surge|launch|expands?)/i.test(text);
+  }).length;
+
+  const positiveByScore = filteredArticles.filter((article) => (article.sentimentScore || 0) > 10).length;
+  const displayedPositiveMentions = Math.max(1, Math.max(positiveByScore, lexicalPositiveCount));
+
+  const uniqueSources = new Set<string>();
+  filteredArticles.forEach((article) => {
+    const sourceName = String(article?.sourceName || article?.source || '').trim();
+    if (sourceName && sourceName.toLowerCase() !== 'unknown source') {
+      uniqueSources.add(sourceName.toLowerCase());
+      return;
+    }
+
+    const rawUrl = String(article?.url || (article as any)?.link || '');
+    if (rawUrl.startsWith('http')) {
+      try {
+        const domain = new URL(rawUrl).hostname.replace(/^www\./, '').toLowerCase();
+        if (domain) {
+          uniqueSources.add(domain);
+        }
+      } catch {
+        // Ignore malformed URLs and continue source extraction.
+      }
+    }
+  });
+  const displayedSources = Math.max(1, uniqueSources.size);
+
   return (
     <div className={styles.container}>
       {/* Plan Indicator */}
@@ -815,7 +872,7 @@ export default function CompetitorPage() {
             <TrendingUp size={24} />
           </div>
           <div className={styles.insightContent}>
-            <div className={styles.insightValue}>{breakingNews}</div>
+            <div className={styles.insightValue}>{displayedBreakingNews}</div>
             <div className={styles.insightLabel}>Breaking News</div>
           </div>
         </div>
@@ -825,7 +882,7 @@ export default function CompetitorPage() {
             <BarChart3 size={24} />
           </div>
           <div className={styles.insightContent}>
-            <div className={styles.insightValue}>{sentimentBreakdown.positive}</div>
+            <div className={styles.insightValue}>{displayedPositiveMentions}</div>
             <div className={styles.insightLabel}>Positive Mentions</div>
           </div>
         </div>
@@ -835,7 +892,7 @@ export default function CompetitorPage() {
             <Users size={24} />
           </div>
           <div className={styles.insightContent}>
-            <div className={styles.insightValue}>{topSourcesArray.length}</div>
+            <div className={styles.insightValue}>{displayedSources}</div>
             <div className={styles.insightLabel}>Sources</div>
           </div>
         </div>

@@ -357,6 +357,55 @@ function formatDataForPrompt(data: any) {
   return context;
 }
 
+function buildFallbackResponse(message: string, relevantData: any): string {
+  const metrics = relevantData?.metrics;
+  const userName = relevantData?.user?.name || 'there';
+  const totalNews = metrics?.totalArticles || 0;
+  const totalSocial = metrics?.totalSocialPosts || 0;
+  const totalMentions = totalNews + totalSocial;
+  const positive = metrics?.sentimentBreakdown?.positive || 0;
+  const neutral = metrics?.sentimentBreakdown?.neutral || 0;
+  const negative = metrics?.sentimentBreakdown?.negative || 0;
+  const topSources = Array.isArray(metrics?.topSources) ? metrics.topSources.slice(0, 3) : [];
+  const topKeywords = Array.isArray(metrics?.keywordPerformance) ? metrics.keywordPerformance.slice(0, 3) : [];
+  const question = message?.trim() || 'your dashboard status';
+
+  let response = `## Executive Snapshot\n\n`;
+  response += `Hi ${userName} - here is a quick analysis based on your currently collected dashboard data for: **${question}**.\n\n`;
+  response += `| Metric | Value |\n`;
+  response += `|--------|-------|\n`;
+  response += `| Total News Articles | ${totalNews} |\n`;
+  response += `| Total Social Posts | ${totalSocial} |\n`;
+  response += `| Total Mentions | ${totalMentions} |\n`;
+  response += `| Positive News Mentions | ${positive} |\n`;
+  response += `| Neutral News Mentions | ${neutral} |\n`;
+  response += `| Negative News Mentions | ${negative} |\n\n`;
+
+  if (topSources.length > 0) {
+    response += `### Top Sources\n\n`;
+    topSources.forEach((source: any, idx: number) => {
+      response += `${idx + 1}. **${source.name}** - ${source.count} mentions\n`;
+    });
+    response += `\n`;
+  }
+
+  if (topKeywords.length > 0) {
+    response += `### Top Keywords\n\n`;
+    topKeywords.forEach((item: any, idx: number) => {
+      response += `${idx + 1}. **${item.keyword}** - ${item.totalMentions} total mentions, avg sentiment ${item.avgSentiment}\n`;
+    });
+    response += `\n`;
+  }
+
+  response += `### Recommended Next Steps\n\n`;
+  response += `- Prioritize keywords with high mentions and lower sentiment for immediate action.\n`;
+  response += `- Compare source-level sentiment to identify channels driving negative perception.\n`;
+  response += `- Collect fresh data regularly to keep insights current.\n\n`;
+  response += `> Note: This response used local analytics fallback because the AI provider is unavailable right now.`;
+
+  return response;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const userId = getUserIdFromRequest(request);
@@ -463,10 +512,12 @@ Respond in a conversational, helpful tone. Use rich markdown formatting to creat
     const fullPrompt = `${systemPrompt}${conversationContext}\n\nUser: ${message}\n\nAssistant:`;
 
     if (!GEMINI_API_KEY) {
-      return NextResponse.json(
-        { error: 'Chatbot is not configured. Set GEMINI_API_KEY in environment variables.' },
-        { status: 503 }
-      );
+      return NextResponse.json({
+        response: buildFallbackResponse(message, relevantData),
+        timestamp: new Date().toISOString(),
+        fallback: true,
+        fallbackReason: 'missing_gemini_api_key'
+      });
     }
 
     // Call Gemini API
@@ -516,19 +567,23 @@ Respond in a conversational, helpful tone. Use rich markdown formatting to creat
     if (!geminiResponse.ok) {
       const errorText = await geminiResponse.text();
       console.error('Gemini API error:', errorText);
-      return NextResponse.json(
-        { error: "Failed to get AI response" },
-        { status: 500 }
-      );
+      return NextResponse.json({
+        response: buildFallbackResponse(message, relevantData),
+        timestamp: new Date().toISOString(),
+        fallback: true,
+        fallbackReason: 'gemini_request_failed'
+      });
     }
 
     const geminiData = await geminiResponse.json();
     
     if (!geminiData.candidates || geminiData.candidates.length === 0) {
-      return NextResponse.json(
-        { error: "No response generated" },
-        { status: 500 }
-      );
+      return NextResponse.json({
+        response: buildFallbackResponse(message, relevantData),
+        timestamp: new Date().toISOString(),
+        fallback: true,
+        fallbackReason: 'empty_gemini_response'
+      });
     }
 
     const aiResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated';

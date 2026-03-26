@@ -700,7 +700,11 @@ export default function SocialListeningFinderPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button type="submit" className={styles.searchButton} disabled={isSearching}>
-              {isSearching ? <RefreshCw className={styles.spinner} /> : 'Search'}
+              {isSearching ? (
+                <RefreshCw className={styles.searchButtonSpinner} />
+              ) : (
+                <span className={styles.searchButtonText}>Search</span>
+              )}
             </button>
           </form>
           <button className={styles.filterButton} onClick={() => setShowFilters(!showFilters)}>

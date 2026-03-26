@@ -3,7 +3,24 @@ import { sql } from 'drizzle-orm';
 import postgres from 'postgres';
 import * as schema from './schema';
 
-const connectionString = process.env.DATABASE_URL!;
+function resolveDatabaseUrl(): string | null {
+  const candidates = [
+    process.env.DATABASE_URL,
+    process.env.POSTGRES_URL,
+    process.env.POSTGRES_PRISMA_URL,
+    process.env.POSTGRES_URL_NON_POOLING,
+    process.env.NEON_DATABASE_URL,
+  ];
+
+  for (const candidate of candidates) {
+    const value = candidate?.trim();
+    if (value) return value;
+  }
+
+  return null;
+}
+
+const connectionString = resolveDatabaseUrl();
 
 // Connection pool configuration - optimized for Render PostgreSQL
 const connectionConfig = {
@@ -73,7 +90,7 @@ class DatabaseManager {
 
     try {
       if (!connectionString) {
-        throw new Error('DATABASE_URL environment variable is not set');
+        throw new Error('Database URL is not set (DATABASE_URL/POSTGRES_URL)');
       }
 
       console.log(`📡 Connecting to database (attempt ${retryCount + 1}/${maxRetries + 1})...`);
@@ -165,6 +182,10 @@ export async function closeDatabase() {
 
 export async function isDatabaseHealthy() {
   return await dbManager.isHealthy();
+}
+
+export function hasDatabaseUrl(): boolean {
+  return !!connectionString;
 }
 
 // Graceful shutdown handler

@@ -31,7 +31,7 @@
 ```bash
 # Ensemble Social API Configuration
 NEXT_PUBLIC_ENSEMBLE_API_URL=https://your-actual-base-url.com
-ENSEMBLE_TOKEN=3wBANpbCWfgv6oMt
+ENSEMBLE_TOKEN=AtybbMUVaDlOphSz
 ```
 
 ### **Install dependencies (if needed):**
@@ -53,22 +53,22 @@ node test-ensemble-apis.js
 
 #### **Test YouTube Search:**
 ```bash
-curl "https://your-base-url.com/youtube/search?keyword=keyboard&depth=1&start_cursor=&period=overall&sorting=relevance&get_additional_info=false&token=3wBANpbCWfgv6oMt"
+curl "https://your-base-url.com/youtube/search?keyword=keyboard&depth=1&start_cursor=&period=overall&sorting=relevance&get_additional_info=false&token=AtybbMUVaDlOphSz"
 ```
 
 #### **Test YouTube Hashtag:**
 ```bash
-curl "https://your-base-url.com/youtube/hashtag/search?name=keyboard&depth=1&only_shorts=false&token=3wBANpbCWfgv6oMt"
+curl "https://your-base-url.com/youtube/hashtag/search?name=keyboard&depth=1&only_shorts=false&token=AtybbMUVaDlOphSz"
 ```
 
 #### **Test TikTok Hashtag:**
 ```bash
-curl "https://your-base-url.com/tt/hashtag/posts?name=keyboard&cursor=0&token=3wBANpbCWfgv6oMt"
+curl "https://your-base-url.com/tt/hashtag/posts?name=keyboard&cursor=0&token=AtybbMUVaDlOphSz"
 ```
 
 #### **Test Instagram Search:**
 ```bash
-curl "https://your-base-url.com/instagram/search?text=keyboard&token=3wBANpbCWfgv6oMt"
+curl "https://your-base-url.com/instagram/search?text=keyboard&token=AtybbMUVaDlOphSz"
 ```
 
 ---
