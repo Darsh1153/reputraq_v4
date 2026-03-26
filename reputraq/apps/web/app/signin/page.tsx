@@ -93,7 +93,7 @@ export default function SigninPage() {
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
-        <h1 className={styles.title}>Welcome Bacccck</h1>
+        <h1 className={styles.title}>Welcome Back</h1>
         <p className={styles.subtitle}>Sign in to your Reputraq account</p>
 
         <form onSubmit={handleSubmit} className={styles.form}>
