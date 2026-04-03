@@ -6,10 +6,10 @@ import { FloatingActionButton } from "@/components/floating-action-button";
 
 export default function UseCasesPage() {
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-x-hidden">
       <ScrollProgress />
       <Navbar />
-      <UseCases />
+      <UseCases standaloneLayout />
       <Footer />
       <FloatingActionButton />
     </div>

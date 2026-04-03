@@ -113,7 +113,10 @@ export function TheReputraqSolution() {
   ];
 
   return (
-    <section id="solution" className="relative py-20 overflow-hidden">
+    <section
+      id="solution"
+      className="relative scroll-mt-24 md:scroll-mt-28 overflow-hidden pb-20 pt-24 md:pt-28"
+    >
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50/30 to-gray-50" />
       

@@ -107,7 +107,10 @@ export function Features() {
   ];
 
   return (
-    <section id="features" className="relative py-20 overflow-hidden">
+    <section
+      id="features"
+      className="relative scroll-mt-24 md:scroll-mt-28 overflow-hidden pb-20 pt-24 md:pt-28"
+    >
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50/30" />
       

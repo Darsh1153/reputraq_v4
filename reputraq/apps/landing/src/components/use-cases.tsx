@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatedText } from "./animated-text";
 import { brandConfig } from "@/lib/brand-config";
 import { appSignupUrl } from "@/lib/app-links";
+import { cn } from "@/lib/utils";
 import { DemoModal } from "./demo-modal";
 import { 
   Megaphone, 
@@ -31,7 +32,7 @@ import {
   Calendar
 } from "lucide-react";
 
-export function UseCases() {
+export function UseCases({ standaloneLayout = false }: { standaloneLayout?: boolean }) {
   const [isVisible, setIsVisible] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
@@ -40,6 +41,46 @@ export function UseCases() {
   const useCases = [
     {
       id: 0,
+      title: "Brand Analytics",
+      icon: Crown,
+      color: brandConfig.colorPalette.colors.charcoalCore.hex,
+      gradient: "from-purple-500 to-pink-500",
+      description: "Comprehensive brand health tracking",
+      features: [
+        {
+          icon: Activity,
+          title: "Brand Health Metrics",
+          description: "Monitor key brand health indicators and track changes over time"
+        },
+        {
+          icon: Monitor,
+          title: "Multi-Platform Coverage",
+          description: "Track your brand across news, social media, blogs, and forums"
+        },
+        {
+          icon: Sparkles,
+          title: "Influencer Tracking",
+          description: "Monitor mentions from key influencers and thought leaders"
+        },
+        {
+          icon: Lightbulb,
+          title: "Trend Analysis",
+          description: "Identify emerging trends and opportunities in your industry"
+        },
+        {
+          icon: PieChart,
+          title: "Audience Insights",
+          description: "Understand your audience demographics, sentiment distribution, and engagement patterns"
+        },
+        {
+          icon: Award,
+          title: "Performance Benchmarking",
+          description: "Compare your brand performance against industry standards and competitors"
+        }
+      ]
+    },
+    {
+      id: 1,
       title: "PR & Communications",
       icon: Megaphone,
       color: brandConfig.colorPalette.colors.vibrantSky.hex,
@@ -79,7 +120,7 @@ export function UseCases() {
       ]
     },
     {
-      id: 1,
+      id: 2,
       title: "Crisis Management",
       icon: AlertTriangle,
       color: brandConfig.colorPalette.colors.oceanDepth.hex,
@@ -117,46 +158,6 @@ export function UseCases() {
           description: "Receive instant notifications via email, SMS, or dashboard when threats are detected"
         }
       ]
-    },
-    {
-      id: 2,
-      title: "Brand Analytics",
-      icon: Crown,
-      color: brandConfig.colorPalette.colors.charcoalCore.hex,
-      gradient: "from-purple-500 to-pink-500",
-      description: "Comprehensive brand health tracking",
-      features: [
-        {
-          icon: Activity,
-          title: "Brand Health Metrics",
-          description: "Monitor key brand health indicators and track changes over time"
-        },
-        {
-          icon: Monitor,
-          title: "Multi-Platform Coverage",
-          description: "Track your brand across news, social media, blogs, and forums"
-        },
-        {
-          icon: Sparkles,
-          title: "Influencer Tracking",
-          description: "Monitor mentions from key influencers and thought leaders"
-        },
-        {
-          icon: Lightbulb,
-          title: "Trend Analysis",
-          description: "Identify emerging trends and opportunities in your industry"
-        },
-        {
-          icon: PieChart,
-          title: "Audience Insights",
-          description: "Understand your audience demographics, sentiment distribution, and engagement patterns"
-        },
-        {
-          icon: Award,
-          title: "Performance Benchmarking",
-          description: "Compare your brand performance against industry standards and competitors"
-        }
-      ]
     }
   ];
 
@@ -179,7 +180,17 @@ export function UseCases() {
   }, [isVisible, useCases.length]);
 
   return (
-    <section id="use-cases" className="relative py-20 overflow-hidden">
+    <section
+      id="use-cases"
+      className={cn(
+        "relative scroll-mt-24 md:scroll-mt-28 overflow-x-hidden",
+        // Top padding must live on the section (not an outer wrapper) so the gradient
+        // background fills the area below the fixed navbar — otherwise the wrapper shows as plain white.
+        standaloneLayout
+          ? "pb-20 pt-24 md:pt-28"
+          : "py-20",
+      )}
+    >
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50/30" />
       
