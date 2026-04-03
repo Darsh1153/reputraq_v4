@@ -4,7 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { AnimatedText } from "./animated-text";
 import { brandConfig } from "@/lib/brand-config";
-import { appSignupUrl } from "@/lib/app-links";
+import {
+  starterPlanCheckoutUrl,
+  growthPlanCheckoutUrl,
+  enterprisePlanCheckoutUrl,
+} from "@/lib/app-links";
 import { 
   Check, 
   Star, 
@@ -24,7 +28,6 @@ import {
 } from "lucide-react";
 
 export function Pricing() {
-  const [isYearly, setIsYearly] = useState(false);
   const [hoveredPlan, setHoveredPlan] = useState<number | null>(null);
   const [visiblePlans, setVisiblePlans] = useState<Set<number>>(new Set());
   const planRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -58,77 +61,65 @@ export function Pricing() {
     {
       id: 0,
       name: "Starter Plan",
-      price: { monthly: 2500, yearly: 25000 },
-      usdPrice: { monthly: 29, yearly: 290 },
+      price: { monthly: 6999 },
       description: "For individuals and small teams",
       icon: Users,
       color: brandConfig.colorPalette.colors.vibrantSky.hex,
       gradient: "from-blue-500 to-cyan-500",
       popular: false,
       features: [
-        { text: "Up to 2 topics", icon: Target },
+        { text: "Up to 2 keywords", icon: Target },
         { text: "Weekly reports", icon: BarChart3 },
         { text: "Basic sentiment insights", icon: TrendingUp }
       ],
-      cta: "Start Free Trial",
+      cta: "Get Started",
       ctaIcon: ArrowRight,
-      ctaHref: appSignupUrl
+      ctaHref: starterPlanCheckoutUrl,
     },
     {
       id: 1,
       name: "Growth Plan",
-      price: { monthly: 20500, yearly: 205000 },
-      usdPrice: { monthly: 149, yearly: 1490 },
+      price: { monthly: 9999 },
       description: "For scaling organizations and agencies",
       icon: Rocket,
       color: brandConfig.colorPalette.colors.oceanDepth.hex,
       gradient: "from-indigo-500 to-purple-500",
       popular: true,
       features: [
-        { text: "Up to 3 topics", icon: Target },
+        { text: "Up to 3 keywords", icon: Target },
         { text: "Real-time alerts via Slack & Teams", icon: Bell },
         { text: "Competitor dashboard", icon: Globe },
         { text: "Unlimited exports & reports", icon: Download }
       ],
       cta: "Get Started",
       ctaIcon: Rocket,
-      ctaHref: appSignupUrl
+      ctaHref: growthPlanCheckoutUrl,
     },
     {
       id: 2,
       name: "Enterprise Plan",
-      price: { monthly: 30000, yearly: 300000 },
-      usdPrice: { monthly: 219, yearly: 2190 },
+      price: { monthly: 14999 },
       description: "For large organizations needing scale and support",
       icon: Crown,
       color: brandConfig.colorPalette.colors.charcoalCore.hex,
       gradient: "from-gray-700 to-gray-900",
       popular: false,
       features: [
-        { text: "Up to 5 topics", icon: Target },
+        { text: "Up to 5 keywords", icon: Target },
         { text: "Dedicated account manager", icon: Headphones },
         { text: "Custom integrations", icon: Settings },
         { text: "Priority onboarding & support", icon: Shield }
       ],
-      cta: "Contact Sales",
+      cta: "Get Started",
       ctaIcon: Crown,
-      ctaHref: appSignupUrl
-    }
+      ctaHref: enterprisePlanCheckoutUrl,
+    },
   ];
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(price);
-  };
-
-  const formatUSDPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(price);
@@ -222,43 +213,6 @@ export function Pricing() {
               highlightColor={brandConfig.colorPalette.colors.vibrantSky.hex}
             />
           </p>
-
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center space-x-4 mb-12">
-            <span 
-              className={`text-lg font-medium transition-colors duration-300 ${
-                !isYearly ? 'text-gray-900' : 'text-gray-500'
-              }`}
-            >
-              Monthly
-            </span>
-            <button
-              onClick={() => setIsYearly(!isYearly)}
-              className={`relative w-16 h-8 rounded-full transition-all duration-300 ${
-                isYearly 
-                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500' 
-                  : 'bg-gray-300'
-              }`}
-            >
-              <div 
-                className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-transform duration-300 ${
-                  isYearly ? 'translate-x-9' : 'translate-x-1'
-                }`}
-              />
-            </button>
-            <span 
-              className={`text-lg font-medium transition-colors duration-300 ${
-                isYearly ? 'text-gray-900' : 'text-gray-500'
-              }`}
-            >
-              Yearly
-            </span>
-            {isYearly && (
-              <div className="ml-4 px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full animate-pulse">
-                Save 17%
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -360,15 +314,8 @@ export function Pricing() {
                       className="text-4xl font-bold mb-2"
                       style={{ color: plan.color }}
                     >
-                      {formatPrice(isYearly ? plan.price.yearly : plan.price.monthly)}
-                      {!isYearly && <span className="text-lg text-gray-500">/month</span>}
-                    </div>
-                    <div 
-                      className="text-sm"
-                      style={{ color: brandConfig.colorPalette.colors.oceanDepth.hex }}
-                    >
-                      {formatUSDPrice(isYearly ? plan.usdPrice.yearly : plan.usdPrice.monthly)}
-                      {!isYearly ? '/month' : '/year'}
+                      {formatPrice(plan.price.monthly)}
+                      <span className="text-lg text-gray-500">/month</span>
                     </div>
                   </div>
                 </div>

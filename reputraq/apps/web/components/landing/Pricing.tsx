@@ -16,7 +16,7 @@ const pricingPlans = [
       "Standard support",
       "Social media monitoring"
     ],
-    cta: "Start Free Trial",
+    cta: "Get Started",
     popular: false
   },
   {
@@ -34,7 +34,7 @@ const pricingPlans = [
       "Custom reports",
       "API access"
     ],
-    cta: "Start Free Trial",
+    cta: "Get Started",
     popular: true
   },
   {
@@ -53,7 +53,7 @@ const pricingPlans = [
       "Custom integrations",
       "SLA guarantee"
     ],
-    cta: "Contact Sales",
+    cta: "Get Started",
     popular: false
   }
 ];

@@ -53,7 +53,7 @@ export function TheReputraqSolution() {
   const poweredByFeatures = [
     {
       icon: Globe,
-      title: "APITube News Intelligence",
+      title: "Global News Intelligence",
       description: "Access 500,000+ news & blog sources in 177 countries and 60+ languages",
       color: brandConfig.colorPalette.colors.vibrantSky.hex,
       delay: 0

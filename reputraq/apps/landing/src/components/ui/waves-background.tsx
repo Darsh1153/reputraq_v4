@@ -154,6 +154,11 @@ export function Waves({
     a: 0,
     set: false,
   })
+  const lastPointerRef = useRef<{ x: number; y: number; valid: boolean }>({
+    x: 0,
+    y: 0,
+    valid: false,
+  })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -266,7 +271,11 @@ export function Waves({
       ctx.stroke()
     }
 
+    let rafId = 0
+    let running = false
+
     function tick(t: number) {
+      if (!running) return
       const mouse = mouseRef.current
 
       mouse.sx += (mouse.x - mouse.sx) * 0.1
@@ -287,7 +296,7 @@ export function Waves({
 
       movePoints(t)
       drawLines()
-      requestAnimationFrame(tick)
+      rafId = requestAnimationFrame(tick)
     }
 
     function onResize() {
@@ -295,18 +304,20 @@ export function Waves({
       setLines()
     }
     function onMouseMove(e: MouseEvent) {
-      updateMouse(e.pageX, e.pageY)
+      updateMouse(e.clientX, e.clientY)
     }
     function onTouchMove(e: TouchEvent) {
       e.preventDefault()
       const touch = e.touches[0]
       updateMouse(touch.clientX, touch.clientY)
     }
-    function updateMouse(x: number, y: number) {
+    function updateMouse(clientX: number, clientY: number) {
       const mouse = mouseRef.current
+      lastPointerRef.current = { x: clientX, y: clientY, valid: true }
+      boundingRef.current = container!.getBoundingClientRect()
       const b = boundingRef.current
-      mouse.x = x - b.left
-      mouse.y = y - b.top + window.scrollY
+      mouse.x = clientX - b.left
+      mouse.y = clientY - b.top
       if (!mouse.set) {
         mouse.sx = mouse.x
         mouse.sy = mouse.y
@@ -316,17 +327,51 @@ export function Waves({
       }
     }
 
+    function onScroll() {
+      const lp = lastPointerRef.current
+      if (lp.valid) {
+        updateMouse(lp.x, lp.y)
+      } else {
+        boundingRef.current = container!.getBoundingClientRect()
+      }
+    }
+
     setSize()
     setLines()
-    requestAnimationFrame(tick)
+
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        const visible = entries[0]?.isIntersecting ?? true
+        if (visible) {
+          if (!running) {
+            running = true
+            rafId = requestAnimationFrame(tick)
+          }
+        } else if (running) {
+          running = false
+          cancelAnimationFrame(rafId)
+        }
+      },
+      { root: null, threshold: 0, rootMargin: "80px" },
+    )
+    intersectionObserver.observe(container!)
+
+    running = true
+    rafId = requestAnimationFrame(tick)
+
     window.addEventListener("resize", onResize)
     window.addEventListener("mousemove", onMouseMove)
     window.addEventListener("touchmove", onTouchMove, { passive: false })
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true })
 
     return () => {
+      running = false
+      cancelAnimationFrame(rafId)
+      intersectionObserver.disconnect()
       window.removeEventListener("resize", onResize)
       window.removeEventListener("mousemove", onMouseMove)
       window.removeEventListener("touchmove", onTouchMove)
+      window.removeEventListener("scroll", onScroll, { capture: true })
     }
   }, [
     lineColor,

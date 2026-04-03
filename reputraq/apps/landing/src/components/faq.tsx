@@ -40,7 +40,7 @@ export function FAQ() {
   const faqs = [
     {
       question: "What does Reputraq track?",
-      answer: "Reputraq tracks both global news/blogs and social mentions via APITube + Phyllo. We monitor your brand across major news outlets, blogs, and social media platforms in real-time.",
+      answer: "Reputraq tracks global news, blogs, and social mentions. We monitor your brand across major news outlets, blogs, and social media platforms in real time.",
       icon: Globe,
       color: brandConfig.colorPalette.primary.main
     },

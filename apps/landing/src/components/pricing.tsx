@@ -21,7 +21,11 @@ import {
   Target,
   Rocket
 } from "lucide-react";
-import { appSignupUrl } from "@/lib/app-links";
+import {
+  starterPlanCheckoutUrl,
+  growthPlanCheckoutUrl,
+  enterprisePlanCheckoutUrl,
+} from "@/lib/app-links";
 
 const Pricing = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -44,63 +48,68 @@ const Pricing = () => {
     {
       id: 0,
       name: "Starter Plan",
-      price: { monthly: 2500, yearly: 25000 },
-      usdPrice: { monthly: 29, yearly: 290 },
+      price: { monthly: 6999 },
       description: "For individuals and small teams",
       icon: Users,
       color: brandConfig.colorPalette.colors.vibrantSky.hex,
       gradient: "from-blue-500 to-cyan-500",
       popular: false,
       features: [
-        { text: "Up to 2 topics", icon: Target },
+        { text: "Up to 2 keywords", icon: Target },
         { text: "Weekly reports", icon: BarChart3 },
         { text: "Basic sentiment insights", icon: TrendingUp }
       ],
-      cta: "Start Free Trial",
+      cta: "Get Started",
       ctaIcon: ArrowRight,
-      ctaHref: appSignupUrl
+      ctaHref: starterPlanCheckoutUrl,
     },
     {
       id: 1,
       name: "Growth Plan",
-      price: { monthly: 20500, yearly: 205000 },
-      usdPrice: { monthly: 149, yearly: 1490 },
+      price: { monthly: 9999 },
       description: "For scaling organizations and agencies",
       icon: Rocket,
       color: brandConfig.colorPalette.colors.oceanDepth.hex,
       gradient: "from-indigo-500 to-purple-500",
       popular: true,
       features: [
-        { text: "Up to 3 topics", icon: Target },
+        { text: "Up to 3 keywords", icon: Target },
         { text: "Real-time alerts via Slack & Teams", icon: Bell },
         { text: "Competitor dashboard", icon: Globe },
         { text: "Unlimited exports & reports", icon: Download }
       ],
       cta: "Get Started",
       ctaIcon: Rocket,
-      ctaHref: appSignupUrl
+      ctaHref: growthPlanCheckoutUrl,
     },
     {
       id: 2,
       name: "Enterprise Plan",
-      price: { monthly: 30000, yearly: 300000 },
-      usdPrice: { monthly: 219, yearly: 2190 },
+      price: { monthly: 14999 },
       description: "For large organizations needing scale and support",
       icon: Crown,
       color: brandConfig.colorPalette.colors.charcoalCore.hex,
       gradient: "from-gray-700 to-gray-900",
       popular: false,
       features: [
-        { text: "Up to 5 topics", icon: Target },
+        { text: "Up to 5 keywords", icon: Target },
         { text: "Dedicated account manager", icon: Headphones },
         { text: "Custom integrations", icon: Settings },
         { text: "Priority onboarding & support", icon: Shield }
       ],
-      cta: "Contact Sales",
+      cta: "Get Started",
       ctaIcon: Crown,
-      ctaHref: appSignupUrl
-    }
+      ctaHref: enterprisePlanCheckoutUrl,
+    },
   ];
+
+  const formatInr = (amount: number) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
 
   return (
     <section className="py-16 bg-gray-50">
@@ -119,8 +128,7 @@ const Pricing = () => {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
                 <div className="flex items-center text-gray-600 text-sm">
-                  <span className="mr-1">${plan.usdPrice.monthly}/mo</span>
-                  <span className="text-gray-400">(${plan.usdPrice.yearly}/yr)</span>
+                  <span>{formatInr(plan.price.monthly)}/mo</span>
                 </div>
               </div>
               <p className="text-lg text-gray-800 mb-6">{plan.description}</p>

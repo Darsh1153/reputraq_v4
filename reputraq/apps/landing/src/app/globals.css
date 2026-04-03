@@ -103,9 +103,9 @@
   animation: glow 2s ease-in-out infinite;
 }
 
-/* Smooth scrolling */
+/* Native scroll for wheel/trackpad; avoid global smooth scroll (causes jank with scroll-linked UI). */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 /* Custom gradient text animation */

@@ -25,7 +25,6 @@ export function Hero({
   ctaHref = appSignupUrl,
 }: HeroProps) {
   const [isDemoOpen, setIsDemoOpen] = useState(false);
-  console.log("Hero component rendered, isDemoOpen:", isDemoOpen);
 
   return (
     <section
@@ -149,7 +148,6 @@ export function Hero({
             variant="outline"
             onClick={() => {
               setIsDemoOpen(true);
-              console.log("Request Demo button clicked");
             }}
             className="mt-[-20px] w-fit md:w-52 z-20 tracking-tighter text-center text-lg hover-elegant flex items-center justify-center gap-2"
             style={{

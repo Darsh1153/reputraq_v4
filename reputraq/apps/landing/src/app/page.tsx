@@ -14,7 +14,7 @@ import { FloatingActionButton } from "@/components/floating-action-button";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-x-hidden">
       <ScrollProgress />
       <Navbar />
       <HeroSection />

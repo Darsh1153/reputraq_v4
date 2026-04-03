@@ -14,13 +14,25 @@ export function FloatingActionButton({ className }: FloatingActionButtonProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
+    let rafId = 0;
+    let pending = false;
+
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      setIsVisible(scrollTop > 300);
+      if (pending) return;
+      pending = true;
+      rafId = requestAnimationFrame(() => {
+        pending = false;
+        const next = window.scrollY > 300;
+        setIsVisible((prev) => (prev === next ? prev : next));
+      });
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const scrollToTop = () => {

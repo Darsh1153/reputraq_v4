@@ -10,7 +10,7 @@ import { appSignupUrl } from "@/lib/app-links";
 
 export function FinalCTA() {
   return (
-    <section className="relative py-20 overflow-hidden">
+    <section className="relative py-20 overflow-x-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50/30" />
       
