@@ -183,7 +183,8 @@ export function UseCases({ standaloneLayout = false }: { standaloneLayout?: bool
     <section
       id="use-cases"
       className={cn(
-        "relative scroll-mt-24 md:scroll-mt-28 overflow-x-hidden",
+        // Clip overflow: dots near 100% left, card hover scales, and tab panels must not widen the page
+        "relative scroll-mt-24 md:scroll-mt-28 overflow-hidden max-w-full",
         // Top padding must live on the section (not an outer wrapper) so the gradient
         // background fills the area below the fixed navbar — otherwise the wrapper shows as plain white.
         standaloneLayout
@@ -194,8 +195,8 @@ export function UseCases({ standaloneLayout = false }: { standaloneLayout?: bool
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-blue-50/30" />
       
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 opacity-10">
+      {/* Animated Background Elements — overflow hidden so edge-positioned dots cannot widen the viewport */}
+      <div className="absolute inset-0 opacity-10 overflow-hidden pointer-events-none">
         {[...Array(20)].map((_, i) => {
           // Use deterministic positioning based on index to avoid hydration mismatch
           const positions = [
@@ -238,7 +239,7 @@ export function UseCases({ standaloneLayout = false }: { standaloneLayout?: bool
         })}
       </div>
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto max-w-full px-4 relative z-10 overflow-hidden">
         {/* Header */}
         <div className="text-center mb-20">
           <h2 
@@ -267,16 +268,17 @@ export function UseCases({ standaloneLayout = false }: { standaloneLayout?: bool
           </p>
         </div>
 
-        {/* Category Navigation */}
-        <div className="flex flex-wrap justify-center gap-4 mb-16">
+        {/* Category Navigation — avoid scale transforms (they overflow and cause horizontal scroll) */}
+        <div className="w-full max-w-full overflow-hidden mb-16">
+          <div className="flex flex-wrap justify-center gap-4">
           {useCases.map((category, index) => (
             <button
               key={index}
               onClick={() => setActiveCategory(index)}
-              className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 ${
+              className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-md ${
                 activeCategory === index 
-                  ? 'shadow-lg scale-105' 
-                  : 'hover:shadow-md'
+                  ? 'shadow-lg' 
+                  : ''
               }`}
               style={{
                 backgroundColor: activeCategory === index ? category.color : 'rgba(255, 255, 255, 0.8)',
@@ -293,19 +295,20 @@ export function UseCases({ standaloneLayout = false }: { standaloneLayout?: bool
               </div>
             </button>
           ))}
+          </div>
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto">
-          {/* Active Category Display */}
-          <div className="mb-16">
+        <div className="max-w-7xl mx-auto w-full min-w-0 overflow-hidden">
+          {/* Active Category Display — relative wrapper contains absolute inactive panels */}
+          <div className="relative mb-16 w-full min-h-[1px] min-w-0 overflow-hidden">
             {useCases.map((category, categoryIndex) => (
               <div
                 key={categoryIndex}
-                className={`transition-all duration-1000 ${
+                className={`transition-all duration-1000 w-full max-w-full ${
                   activeCategory === categoryIndex 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-8 absolute'
+                    ? 'relative z-10 opacity-100 translate-y-0' 
+                    : 'pointer-events-none absolute inset-x-0 top-0 z-0 opacity-0 translate-y-8'
                 }`}
               >
                 <div className="text-center mb-12">
@@ -340,11 +343,11 @@ export function UseCases({ standaloneLayout = false }: { standaloneLayout?: bool
                 </div>
 
                 {/* Features Grid */}
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-3 gap-8 min-w-0">
                   {category.features.map((feature, featureIndex) => (
                     <div
                       key={`${categoryIndex}-${featureIndex}`}
-                      className={`relative p-8 rounded-3xl bg-white/90 backdrop-blur-sm border-2 transition-all duration-700 transform hover:scale-105 cursor-pointer ${
+                      className={`relative p-8 rounded-3xl bg-white/90 backdrop-blur-sm border-2 transition-all duration-700 transform hover:-translate-y-0.5 hover:shadow-xl cursor-pointer min-w-0 ${
                         activeCategory === categoryIndex
                           ? 'opacity-100 translate-y-0 scale-100' 
                           : 'opacity-0 translate-y-8 scale-95'
@@ -422,13 +425,13 @@ export function UseCases({ standaloneLayout = false }: { standaloneLayout?: bool
                 border: `2px solid ${brandConfig.colorPalette.colors.vibrantSky.hex}20`
               }}
             >
-              <div className="flex items-center justify-center mb-6">
+              <div className="flex flex-wrap items-center justify-center gap-3 mb-6 min-w-0">
                 <Sparkles 
-                  className="w-8 h-8 mr-3 animate-pulse" 
+                  className="w-8 h-8 shrink-0 animate-pulse" 
                   style={{ color: brandConfig.colorPalette.colors.vibrantSky.hex }}
                 />
                 <h3 
-                  className="text-3xl md:text-4xl font-bold"
+                  className="text-3xl md:text-4xl font-bold min-w-0 max-w-full text-center"
                   style={{ color: brandConfig.colorPalette.colors.charcoalCore.hex }}
                 >
                   <AnimatedText
@@ -458,7 +461,7 @@ export function UseCases({ standaloneLayout = false }: { standaloneLayout?: bool
                   onClick={() => {
                     console.log("Start Free Trial button clicked from Use Cases");
                   }}
-                  className="px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center group"
+                  className="px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover:brightness-105 flex items-center justify-center group"
                   style={{
                     backgroundColor: brandConfig.colorPalette.colors.vibrantSky.hex,
                     color: brandConfig.colorPalette.colors.pureWhite.hex,
@@ -478,7 +481,7 @@ export function UseCases({ standaloneLayout = false }: { standaloneLayout?: bool
                     setIsDemoOpen(true);
                     console.log("Schedule Demo button clicked from Use Cases");
                   }}
-                  className="px-8 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-300 transform hover:scale-105 flex items-center justify-center group"
+                  className="px-8 py-4 rounded-xl font-semibold text-lg border-2 transition-all duration-300 hover:brightness-95 flex items-center justify-center group"
                   style={{
                     borderColor: brandConfig.colorPalette.colors.oceanDepth.hex,
                     color: brandConfig.colorPalette.colors.oceanDepth.hex,
